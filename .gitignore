@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local profile backups
+app/profile/page.tsx.backup
+app/profile/page.tsx.before-free-avatar-update
+app/profile/page.tsx.before-free-avatars
