@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -12,9 +14,9 @@ export default function Home() {
             <a href="#" className="hover:text-white">
               Discover
             </a>
-            <a href="#" className="hover:text-white">
+            <Link href="/games" className="hover:text-white">
               Games
-            </a>
+            </Link>
             <a href="#" className="hover:text-white">
               Community
             </a>
@@ -27,13 +29,13 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="rounded-lg px-4 py-2 text-sm text-slate-300 hover:text-white">
+            <Link href="/login" className="rounded-lg px-4 py-2 text-sm text-slate-300 hover:text-white">
               Log in
-            </button>
+            </Link>
 
-            <button className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
+            <Link href="/signup" className="rounded-lg bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-300">
               Join GamerRP
-            </button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -56,13 +58,13 @@ export default function Home() {
           </p>
 
           <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-            <button className="rounded-xl bg-cyan-400 px-7 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300">
+            <Link href="/signup" className="rounded-xl bg-cyan-400 px-7 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300">
               Create your profile
-            </button>
+            </Link>
 
-            <button className="rounded-xl border border-white/15 px-7 py-3.5 font-semibold text-white hover:bg-white/5">
-              Explore gamers
-            </button>
+            <Link href="/games" className="rounded-xl border border-white/15 px-7 py-3.5 font-semibold text-white hover:bg-white/5">
+              Explore games
+            </Link>
           </div>
         </div>
       </section>
@@ -102,9 +104,9 @@ export default function Home() {
           Build it. Share it. Get discovered.
         </p>
 
-        <button className="mt-8 rounded-xl bg-cyan-400 px-7 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300">
+        <Link href="/signup" className="mt-8 inline-block rounded-xl bg-cyan-400 px-7 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300">
           Get started with GamerRP
-        </button>
+        </Link>
       </section>
     </main>
   );
