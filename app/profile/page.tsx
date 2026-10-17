@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type ValorantData = {
   experience: string;
@@ -57,6 +58,31 @@ export default function Profile() {
     if (skillsData) {
       setGamingSkills(JSON.parse(skillsData));
     }
+
+    let active = true;
+
+    async function loadGamerName() {
+      const { data, error } = await supabase.auth.getUser();
+      if (!active || error) return;
+
+      const authName = data.user?.user_metadata?.gamer_name;
+      if (typeof authName === "string" && authName.trim()) {
+        const localProfile = localStorage.getItem("gamerrp-profile");
+        const localName = localProfile
+          ? (JSON.parse(localProfile) as ProfileData).gamerName
+          : "";
+
+        if (!localName?.trim()) {
+          setGamerName(authName.trim());
+        }
+      }
+    }
+
+    void loadGamerName();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   function toggleSkill(skill: string) {
