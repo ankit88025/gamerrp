@@ -30,55 +30,54 @@ export default function Profile() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const savedAvatarStyle = localStorage.getItem("gamerrp-avatar-style");
-    if (savedAvatarStyle && ["Cyber Ninja", "Neon Samurai", "Cosmic Wolf"].includes(savedAvatarStyle)) {
-      setAvatarStyle(savedAvatarStyle);
-    }
-
-    const profileData = localStorage.getItem("gamerrp-profile");
-    const valorantData = localStorage.getItem("gamerrp-valorant");
-    const gamesData = localStorage.getItem("gamerrp-games");
-    const skillsData = localStorage.getItem("gamerrp-skills");
-
-    if (profileData) {
-      const profile: ProfileData = JSON.parse(profileData);
-      setGamerName(profile.gamerName || "");
-      setBio(profile.bio || "");
-      setCountry(profile.country || "");
-    }
-
-    if (valorantData) {
-      setValorant(JSON.parse(valorantData));
-    }
-
-    if (gamesData) {
-      setSelectedGames(JSON.parse(gamesData));
-    }
-
-    if (skillsData) {
-      setGamingSkills(JSON.parse(skillsData));
-    }
-
     let active = true;
 
-    async function loadGamerName() {
-      const { data, error } = await supabase.auth.getUser();
-      if (!active || error) return;
+    async function loadCloudProfile() {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (!active) return;
 
-      const authName = data.user?.user_metadata?.gamer_name;
-      if (typeof authName === "string" && authName.trim()) {
-        const localProfile = localStorage.getItem("gamerrp-profile");
-        const localName = localProfile
-          ? (JSON.parse(localProfile) as ProfileData).gamerName
-          : "";
+      if (authError || !authData.user) {
+        window.location.replace("/login");
+        return;
+      }
 
-        if (!localName?.trim()) {
-          setGamerName(authName.trim());
+      const { data: cloudProfile, error } = await supabase
+        .from("gamer_profiles")
+        .select("gamer_name, bio, country, selected_games, valorant, gaming_skills, avatar_style")
+        .eq("user_id", authData.user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Cloud profile load failed:", error.message);
+        return;
+      }
+
+      if (cloudProfile) {
+        setGamerName(cloudProfile.gamer_name || authData.user.user_metadata?.gamer_name || "");
+        setBio(cloudProfile.bio || "");
+        setCountry(cloudProfile.country || "");
+        setSelectedGames(Array.isArray(cloudProfile.selected_games) ? cloudProfile.selected_games : []);
+        setGamingSkills(Array.isArray(cloudProfile.gaming_skills) ? cloudProfile.gaming_skills : []);
+        setValorant(cloudProfile.valorant as ValorantData | null);
+
+        const avatar = cloudProfile.avatar_style;
+        if (avatar && ["Cyber Ninja", "Neon Samurai", "Cosmic Wolf"].includes(avatar)) {
+          setAvatarStyle(avatar);
         }
+      } else {
+        setGamerName(authData.user.user_metadata?.gamer_name || "");
+        setBio("");
+        setCountry("");
+        setSelectedGames([]);
+        setGamingSkills([]);
+        setValorant(null);
+        setAvatarStyle("Cyber Ninja");
       }
     }
 
-    void loadGamerName();
+    void loadCloudProfile();
 
     return () => {
       active = false;
@@ -91,22 +90,54 @@ export default function Profile() {
         ? current.filter((item) => item !== skill)
         : [...current, skill];
 
-      localStorage.setItem("gamerrp-skills", JSON.stringify(updated));
       return updated;
     });
   }
 
-  function handleSave() {
-    localStorage.setItem(
-      "gamerrp-profile",
-      JSON.stringify({
-        gamerName,
-        bio,
-        country,
-      })
-    );
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      alert("Logout failed: " + error.message);
+      return;
+    }
+
+    window.location.href = "/login";
+  }
+
+  async function handleSave() {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      alert("Please log in to save your profile to your account.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("gamer_profiles")
+      .upsert(
+        {
+          user_id: authData.user.id,
+          gamer_name: gamerName,
+          bio,
+          country,
+          selected_games: selectedGames,
+          valorant,
+          gaming_skills: gamingSkills,
+          avatar_style: avatarStyle,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+    if (error) {
+      console.error("Supabase profile save failed:", error.message);
+      alert("Profile saved on this device, but cloud save failed: " + error.message);
+      return;
+    }
 
     setSaved(true);
+    alert("Profile saved to your account successfully!");
   }
 
   return (
@@ -382,7 +413,6 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={() => {
-                  localStorage.setItem("gamerrp-avatar-style", avatarStyle);
                   setAvatarSaved(true);
                 }}
                 className="mt-4 w-full rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
@@ -460,6 +490,14 @@ export default function Profile() {
             className="w-full rounded-xl bg-cyan-400 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300"
           >
             Save Profile
+          </button>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-3 w-full rounded-xl border border-red-400/30 py-3 font-semibold text-red-300 hover:bg-red-400/10"
+          >
+            Sign out of GamerRP
           </button>
 
           {saved && (

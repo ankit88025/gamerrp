@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function ValorantExperience() {
   const [experience, setExperience] = useState("");
@@ -11,7 +12,62 @@ export default function ValorantExperience() {
   const [achievements, setAchievements] = useState("");
   const [saved, setSaved] = useState(false);
 
-  function handleSave() {
+  useEffect(() => {
+    let active = true;
+
+    async function loadValorant() {
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
+
+      if (!active) return;
+
+      if (authError || !authData.user) {
+        window.location.replace("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("gamer_profiles")
+        .select("valorant")
+        .eq("user_id", authData.user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Valorant load failed:", error.message);
+        alert("Could not load your Valorant details. Please refresh and try again.");
+        return;
+      }
+
+      const details = data?.valorant;
+
+      if (details && typeof details === "object" && !Array.isArray(details)) {
+        setExperience(typeof details.experience === "string" ? details.experience : "");
+        setRole(typeof details.role === "string" ? details.role : "");
+        setCurrentRank(typeof details.currentRank === "string" ? details.currentRank : "");
+        setHighestRank(typeof details.highestRank === "string" ? details.highestRank : "");
+        setCompetitive(typeof details.competitive === "string" ? details.competitive : "");
+        setAchievements(typeof details.achievements === "string" ? details.achievements : "");
+      }
+    }
+
+    void loadValorant();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleSave() {
+    const { data: authData, error: authError } =
+      await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      window.location.replace("/login");
+      return;
+    }
+
     const data = {
       experience,
       role,
@@ -21,7 +77,23 @@ export default function ValorantExperience() {
       achievements,
     };
 
-    localStorage.setItem("gamerrp-valorant", JSON.stringify(data));
+    const { error } = await supabase
+      .from("gamer_profiles")
+      .upsert(
+        {
+          user_id: authData.user.id,
+          valorant: data,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+    if (error) {
+      console.error("Valorant save failed:", error.message);
+      alert("Valorant details could not be saved: " + error.message);
+      return;
+    }
+
     setSaved(true);
   }
 

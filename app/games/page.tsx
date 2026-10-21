@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 const games = [
   "Valorant",
@@ -21,20 +22,74 @@ export default function Games() {
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("gamerrp-games");
+    let active = true;
 
-    if (saved) {
-      setSelectedGames(JSON.parse(saved));
+    async function loadGames() {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+
+      if (!active) return;
+
+      if (authError || !authData.user) {
+        window.location.replace("/login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("gamer_profiles")
+        .select("selected_games")
+        .eq("user_id", authData.user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Games load failed:", error.message);
+        alert("Could not load your games. Please refresh and try again.");
+        return;
+      }
+
+      setSelectedGames(
+        data && Array.isArray(data.selected_games) ? data.selected_games : []
+      );
     }
+
+    void loadGames();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  function toggleGame(game: string) {
+  async function toggleGame(game: string) {
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !authData.user) {
+      window.location.replace("/login");
+      return;
+    }
+
     const updatedGames = selectedGames.includes(game)
       ? selectedGames.filter((item) => item !== game)
       : [...selectedGames, game];
 
+    const { error } = await supabase
+      .from("gamer_profiles")
+      .upsert(
+        {
+          user_id: authData.user.id,
+          selected_games: updatedGames,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" }
+      );
+
+    if (error) {
+      console.error("Games save failed:", error.message);
+      alert("Games could not be saved: " + error.message);
+      return;
+    }
+
     setSelectedGames(updatedGames);
-    localStorage.setItem("gamerrp-games", JSON.stringify(updatedGames));
   }
 
   const filteredGames = games.filter((game) =>
