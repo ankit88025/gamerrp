@@ -11,18 +11,18 @@ export default function Home() {
           </div>
 
           <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
-            <a href="#" className="hover:text-white">
+            <Link href="/discover" className="hover:text-white">
               Discover
-            </a>
+            </Link>
             <Link href="/games" className="hover:text-white">
               Games
             </Link>
-            <a href="#" className="hover:text-white">
-              Community
-            </a>
-            <a href="#" className="hover:text-white">
-              About
-            </a>
+            <Link href="/feed" className="hover:text-white">
+              Community Feed
+            </Link>
+            <Link href="/opportunities" className="hover:text-white">
+              Opportunities
+            </Link>
             <a href="/pricing" className="text-cyan-400 hover:text-cyan-300">
               Pricing
             </a>
@@ -62,8 +62,8 @@ export default function Home() {
               Create your profile
             </Link>
 
-            <Link href="/games" className="rounded-xl border border-white/15 px-7 py-3.5 font-semibold text-white hover:bg-white/5">
-              Explore games
+            <Link href="/feed" className="rounded-xl border border-white/15 px-7 py-3.5 font-semibold text-white hover:bg-white/5">
+              Open community feed
             </Link>
           </div>
         </div>
@@ -72,7 +72,7 @@ export default function Home() {
       {/* Features */}
       <section className="border-t border-white/10 bg-slate-900/50">
         <div className="mx-auto max-w-7xl px-6 py-20">
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Feature
               title="Gaming Profile"
               description="Create a professional profile that represents your gaming journey."
@@ -87,8 +87,18 @@ export default function Home() {
 
             <Feature
               title="Gaming Network"
-              description="Connect with gamers, teams, creators, coaches and gaming professionals."
+              description="Discover gamers, follow players and grow your professional network."
               icon="🌎"
+            />
+            <Feature
+              title="Community Feed"
+              description="Share updates, like posts and talk with other gamers."
+              icon="💬"
+            />
+            <Feature
+              title="Team Opportunities"
+              description="Post team recruitment, scrims, tournament squads and coaching opportunities."
+              icon="🏆"
             />
           </div>
         </div>
