@@ -18,19 +18,33 @@ export default function DiscoverPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data: auth, error: authError } = await supabase.auth.getUser();
-    if (authError || !auth.user) { window.location.replace("/login"); return; }
-    const currentUserId = auth.user.id;
+    const { data: auth } = await supabase.auth.getUser();
+    const currentUserId = auth.user?.id || "";
     setUserId(currentUserId);
-    const [{ data: profileRows, error: profileError }, { data: followRows, error: followError }] = await Promise.all([
-      supabase.from("gamer_profiles").select("user_id,gamer_name,bio,country,selected_games,gaming_skills,avatar_style").order("updated_at", { ascending: false }).limit(100),
-      supabase.from("gamer_follows").select("following_id").eq("follower_id", currentUserId),
-    ]);
+
+    const { data: profileRows, error: profileError } = await supabase
+      .from("gamer_profiles")
+      .select("user_id,gamer_name,bio,country,selected_games,gaming_skills,avatar_style")
+      .order("updated_at", { ascending: false })
+      .limit(100);
+
+    let followRows: { following_id: string }[] = [];
+    let followError: { message: string } | null = null;
+
+    if (currentUserId) {
+      const result = await supabase
+        .from("gamer_follows")
+        .select("following_id")
+        .eq("follower_id", currentUserId);
+      followRows = result.data || [];
+      followError = result.error;
+    }
+
     if (profileError || followError) {
       setMessage(`Could not load gamers: ${(profileError || followError)?.message || "Unknown error"}. Check SUPABASE_SETUP.sql.`);
     } else {
-      setGamers(((profileRows || []) as Gamer[]).filter((g) => g.user_id !== currentUserId));
-      setFollowing((followRows || []).map((f) => f.following_id));
+      setGamers(((profileRows || []) as Gamer[]).filter((g) => !currentUserId || g.user_id !== currentUserId));
+      setFollowing(followRows.map((f) => f.following_id));
     }
     setLoading(false);
   }, []);
@@ -38,6 +52,10 @@ export default function DiscoverPage() {
   useEffect(() => { void load(); }, [load]);
 
   async function toggleFollow(gamerId: string) {
+    if (!userId) {
+      window.location.href = "/login";
+      return;
+    }
     const isFollowing = following.includes(gamerId);
     const result = isFollowing
       ? await supabase.from("gamer_follows").delete().eq("follower_id", userId).eq("following_id", gamerId)

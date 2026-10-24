@@ -1,446 +1,1849 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const games = [
-  'Valorant',
-  'Counter-Strike 2',
-  'Counter-Strike: Global Offensive',
-  'Dota 2',
-  'League of Legends',
-  'Teamfight Tactics',
-  'Legends of Runeterra',
-  'Wild Rift',
-  'Overwatch 2',
-  'Apex Legends',
-  'Fortnite',
-  'PUBG: Battlegrounds',
-  'PUBG Mobile',
-  'BGMI',
-  'Call of Duty: Warzone',
-  'Call of Duty: Modern Warfare III',
-  'Call of Duty: Mobile',
-  'Call of Duty: Black Ops 6',
-  'Rainbow Six Siege',
-  'The Finals',
-  'Rocket League',
-  "Tom Clancy's XDefiant",
-  'Paladins',
-  'Smite 2',
-  'Marvel Rivals',
-  'Deadlock',
-  'Escape from Tarkov',
-  'Arena Breakout',
-  'Free Fire',
-  'Free Fire MAX',
-  'Standoff 2',
-  'Critical Ops',
-  'Blood Strike',
-  'Delta Force',
-  'War Thunder',
-  'World of Tanks',
-  'World of Warships',
-  'Battlefield 2042',
-  'Battlefield V',
-  'Halo Infinite',
-  'Destiny 2',
-  'Warframe',
-  'Genshin Impact',
-  'Honkai: Star Rail',
-  'Zenless Zone Zero',
-  'Wuthering Waves',
-  'Honkai Impact 3rd',
-  'Tower of Fantasy',
-  'Black Desert Online',
-  'Final Fantasy XIV',
-  'World of Warcraft',
-  'The Elder Scrolls Online',
-  'Guild Wars 2',
-  'Lost Ark',
-  'New World',
-  'Path of Exile',
-  'Path of Exile 2',
-  'Diablo IV',
-  'Diablo III',
-  'Elden Ring',
-  'Dark Souls III',
-  'Monster Hunter: World',
-  'Monster Hunter Rise',
+const releasedGames = [
+  "Valorant",
+  "Counter-Strike 2",
+  "Counter-Strike: Global Offensive",
+  "Dota 2",
+  "League of Legends",
+  "Teamfight Tactics",
+  "Legends of Runeterra",
+  "Wild Rift",
+  "Overwatch 2",
+  "Apex Legends",
+  "Fortnite",
+  "PUBG: Battlegrounds",
+  "PUBG Mobile",
+  "BGMI",
+  "Call of Duty: Warzone",
+  "Call of Duty: Modern Warfare III",
+  "Call of Duty: Mobile",
+  "Call of Duty: Black Ops 6",
+  "Rainbow Six Siege",
+  "The Finals",
+  "Rocket League",
+  "Paladins",
+  "Smite 2",
+  "Marvel Rivals",
+  "Deadlock",
+  "Escape from Tarkov",
+  "Arena Breakout",
+  "Free Fire",
+  "Free Fire MAX",
+  "Standoff 2",
+  "Critical Ops",
+  "Blood Strike",
+  "Delta Force",
+  "War Thunder",
+  "World of Tanks",
+  "World of Warships",
+  "Battlefield 2042",
+  "Battlefield V",
+  "Halo Infinite",
+  "Destiny 2",
+  "Warframe",
+  "Genshin Impact",
+  "Honkai: Star Rail",
+  "Zenless Zone Zero",
+  "Wuthering Waves",
+  "Honkai Impact 3rd",
+  "Tower of Fantasy",
+  "Black Desert Online",
+  "Final Fantasy XIV",
+  "World of Warcraft",
+  "The Elder Scrolls Online",
+  "Guild Wars 2",
+  "Lost Ark",
+  "New World",
+  "Path of Exile",
+  "Path of Exile 2",
+  "Diablo IV",
+  "Diablo III",
+  "Elden Ring",
+  "Dark Souls III",
+  "Monster Hunter: World",
+  "Monster Hunter Rise",
   "Baldur's Gate 3",
-  'The Witcher 3: Wild Hunt',
-  'Cyberpunk 2077',
-  'Red Dead Redemption 2',
-  'Grand Theft Auto V',
-  'Grand Theft Auto Online',
-  'Minecraft',
-  'Roblox',
-  'Terraria',
-  'Stardew Valley',
-  'The Sims 4',
-  'Palworld',
-  'ARK: Survival Ascended',
-  'Rust',
-  'DayZ',
-  'Valheim',
+  "The Witcher 3: Wild Hunt",
+  "Cyberpunk 2077",
+  "Red Dead Redemption 2",
+  "Grand Theft Auto V",
+  "Grand Theft Auto Online",
+  "Minecraft",
+  "Roblox",
+  "Terraria",
+  "Stardew Valley",
+  "The Sims 4",
+  "Palworld",
+  "ARK: Survival Ascended",
+  "Rust",
+  "DayZ",
+  "Valheim",
   "Don't Starve Together",
-  'Project Zomboid',
-  '7 Days to Die',
-  'Among Us',
-  'Fall Guys',
-  'Party Animals',
-  'Lethal Company',
-  'Phasmophobia',
-  'Content Warning',
+  "Project Zomboid",
+  "7 Days to Die",
+  "Among Us",
+  "Fall Guys",
+  "Party Animals",
+  "Lethal Company",
+  "Phasmophobia",
+  "Content Warning",
   "Five Nights at Freddy's",
-  'Dead by Daylight',
-  'Identity V',
-  'The Forest',
-  'Sons of the Forest',
-  'Left 4 Dead 2',
-  'Back 4 Blood',
-  'Helldivers 2',
-  'Deep Rock Galactic',
-  'Payday 3',
-  'Sea of Thieves',
+  "Dead by Daylight",
+  "Identity V",
+  "The Forest",
+  "Sons of the Forest",
+  "Left 4 Dead 2",
+  "Back 4 Blood",
+  "Helldivers 2",
+  "Deep Rock Galactic",
+  "Payday 3",
+  "Sea of Thieves",
   "No Man's Sky",
-  'Star Citizen',
-  'Microsoft Flight Simulator',
-  'Forza Horizon 5',
-  'Forza Motorsport',
-  'Gran Turismo 7',
-  'Need for Speed Unbound',
-  'The Crew Motorfest',
-  'F1 25',
-  'EA Sports FC 26',
-  'eFootball',
-  'NBA 2K26',
-  'Madden NFL 26',
-  'WWE 2K25',
-  'Rocket League Sideswipe',
-  'Clash of Clans',
-  'Clash Royale',
-  'Brawl Stars',
-  'Mobile Legends: Bang Bang',
-  'Honor of Kings',
-  'Arena of Valor',
-  'Pokémon Unite',
-  'Pokémon GO',
-  'Pokémon TCG Live',
-  'Marvel Snap',
-  'Hearthstone',
-  'Magic: The Gathering Arena',
-  'Teamfight Tactics Mobile',
-  'Chess.com',
-  'Lichess',
-  'osu!',
-  'Geometry Dash',
-  'Trackmania',
-  'Age of Empires IV',
-  'Civilization VI',
-  'Civilization VII',
-  'StarCraft II',
-  'Warcraft III: Reforged',
-  'Company of Heroes 3',
-  'Total War: Warhammer III',
-  'The Binding of Isaac: Rebirth',
-  'Hades II',
-  'Hades',
-  'Hollow Knight',
-  'Hollow Knight: Silksong',
-  'Celeste',
-  'Cuphead',
-  'Dead Cells',
-  'Risk of Rain 2',
-  'Vampire Survivors',
-  'Slay the Spire',
-  'Balatro',
-  'Undertale',
-  'Deltarune',
-  'Persona 5 Royal',
-  'Like a Dragon: Infinite Wealth',
-  'Tekken 8',
-  'Street Fighter 6',
-  'Mortal Kombat 1',
-  'Guilty Gear -Strive-',
-  'Super Smash Bros. Ultimate',
-  'Brawlhalla',
-  'MultiVersus',
-  'Fighting EX Layer',
-  'It Takes Two',
-  'Overcooked! 2',
-  'Human: Fall Flat',
-  'Golf With Your Friends',
-  'Ultimate Chicken Horse',
-  'Jackbox Party Pack',
-  'Splitgate 2',
-  'BattleBit Remastered',
-  'Insurgency: Sandstorm',
-  'Ready or Not',
-  'Squad',
-  'Hell Let Loose',
-  'Arma 3',
-  'Foxhole',
-  'Chivalry 2',
-  'Mordhau',
-  'Mount & Blade II: Bannerlord',
-  'Conan Exiles',
-  'The Isle',
-  'Jurassic World Evolution 2',
-  'Cities: Skylines II',
-  'Factorio',
-  'Satisfactory',
-  'Oxygen Not Included',
-  'RimWorld',
-  'Kerbal Space Program',
-  'Euro Truck Simulator 2',
-  'American Truck Simulator',
-  'House Flipper 2',
-  'PowerWash Simulator',
-  'Palia',
-  'Disney Dreamlight Valley',
-  'Animal Crossing: New Horizons',
-  'The Legend of Zelda: Tears of the Kingdom',
-  'Super Mario Bros. Wonder',
-  'Splatoon 3',
-  'Mario Kart 8 Deluxe',
-  'Metroid Dread',
-  'Fire Emblem: Three Houses',
-  'Final Fantasy VII Rebirth',
-  'Kingdom Hearts III',
-  'Resident Evil 4',
-  'Silent Hill 2',
-  'Alan Wake 2',
-  'The Last of Us Part I',
-  'God of War Ragnarök',
+  "Star Citizen",
+  "Microsoft Flight Simulator",
+  "Forza Horizon 5",
+  "Forza Motorsport",
+  "Gran Turismo 7",
+  "Need for Speed Unbound",
+  "The Crew Motorfest",
+  "F1 25",
+  "EA Sports FC 26",
+  "eFootball",
+  "NBA 2K26",
+  "Madden NFL 26",
+  "WWE 2K25",
+  "Rocket League Sideswipe",
+  "Clash of Clans",
+  "Clash Royale",
+  "Brawl Stars",
+  "Mobile Legends: Bang Bang",
+  "Honor of Kings",
+  "Arena of Valor",
+  "Pokémon Unite",
+  "Pokémon GO",
+  "Pokémon TCG Live",
+  "Marvel Snap",
+  "Hearthstone",
+  "Magic: The Gathering Arena",
+  "Teamfight Tactics Mobile",
+  "Chess.com",
+  "Lichess",
+  "osu!",
+  "Geometry Dash",
+  "Trackmania",
+  "Age of Empires IV",
+  "Civilization VI",
+  "Civilization VII",
+  "StarCraft II",
+  "Warcraft III: Reforged",
+  "Company of Heroes 3",
+  "Total War: Warhammer III",
+  "The Binding of Isaac: Rebirth",
+  "Hades II",
+  "Hades",
+  "Hollow Knight",
+  "Hollow Knight: Silksong",
+  "Celeste",
+  "Cuphead",
+  "Dead Cells",
+  "Risk of Rain 2",
+  "Vampire Survivors",
+  "Slay the Spire",
+  "Balatro",
+  "Undertale",
+  "Deltarune",
+  "Persona 5 Royal",
+  "Like a Dragon: Infinite Wealth",
+  "Tekken 8",
+  "Street Fighter 6",
+  "Mortal Kombat 1",
+  "Guilty Gear -Strive-",
+  "Super Smash Bros. Ultimate",
+  "Brawlhalla",
+  "MultiVersus",
+  "Fighting EX Layer",
+  "It Takes Two",
+  "Overcooked! 2",
+  "Human: Fall Flat",
+  "Golf With Your Friends",
+  "Ultimate Chicken Horse",
+  "Jackbox Party Pack",
+  "Splitgate 2",
+  "BattleBit Remastered",
+  "Insurgency: Sandstorm",
+  "Ready or Not",
+  "Squad",
+  "Hell Let Loose",
+  "Arma 3",
+  "Foxhole",
+  "Chivalry 2",
+  "Mordhau",
+  "Mount & Blade II: Bannerlord",
+  "Conan Exiles",
+  "The Isle",
+  "Jurassic World Evolution 2",
+  "Cities: Skylines II",
+  "Factorio",
+  "Satisfactory",
+  "Oxygen Not Included",
+  "RimWorld",
+  "Kerbal Space Program",
+  "Euro Truck Simulator 2",
+  "American Truck Simulator",
+  "House Flipper 2",
+  "PowerWash Simulator",
+  "Palia",
+  "Disney Dreamlight Valley",
+  "Animal Crossing: New Horizons",
+  "The Legend of Zelda: Tears of the Kingdom",
+  "Super Mario Bros. Wonder",
+  "Splatoon 3",
+  "Mario Kart 8 Deluxe",
+  "Metroid Dread",
+  "Fire Emblem: Three Houses",
+  "Final Fantasy VII Rebirth",
+  "Kingdom Hearts III",
+  "Resident Evil 4",
+  "Silent Hill 2",
+  "Alan Wake 2",
+  "The Last of Us Part I",
+  "God of War Ragnarök",
   "Marvel's Spider-Man 2",
-  'Horizon Forbidden West',
+  "Horizon Forbidden West",
   "Ghost of Tsushima Director's Cut",
-  'Uncharted: Legacy of Thieves Collection',
+  "Uncharted: Legacy of Thieves Collection",
   "Death Stranding Director's Cut",
-  'Control',
-  'Remnant II',
-  'Lies of P',
-  'Black Myth: Wukong',
-  'Sekiro: Shadows Die Twice',
-  'Naraka: Bladepoint',
-  'Once Human',
-  'The First Descendant',
-  'Throne and Liberty',
-  'Core Keeper',
-  'Enshrouded',
-  'Grounded',
-  'Subnautica',
-  'Dying Light 2 Stay Human',
-  'The Division 2',
-  'The Crew 2',
-  'Trackmania Turbo',
-  'Tetris Effect: Connected',
-  'Puyo Puyo Tetris 2',
-  'Peggle',
-  'Plants vs. Zombies',
-  'Plants vs. Zombies 2',
-  'Bloons TD 6',
-  'Mini Metro',
-  'Mini Motorways',
-  'Farming Simulator 25',
-  'Football Manager 2024',
-  'Out of the Park Baseball',
-  'Super Auto Pets',
-  'Legends of Idleon',
-  'Cookie Clicker',
-  'Idle Champions of the Forgotten Realms',
+  "Control",
+  "Remnant II",
+  "Lies of P",
+  "Black Myth: Wukong",
+  "Sekiro: Shadows Die Twice",
+  "Naraka: Bladepoint",
+  "Once Human",
+  "The First Descendant",
+  "Throne and Liberty",
+  "Core Keeper",
+  "Enshrouded",
+  "Grounded",
+  "Subnautica",
+  "Dying Light 2 Stay Human",
+  "The Division 2",
+  "The Crew 2",
+  "Trackmania Turbo",
+  "Tetris Effect: Connected",
+  "Puyo Puyo Tetris 2",
+  "Peggle",
+  "Plants vs. Zombies",
+  "Plants vs. Zombies 2",
+  "Bloons TD 6",
+  "Mini Metro",
+  "Mini Motorways",
+  "Farming Simulator 25",
+  "Football Manager 2024",
+  "Out of the Park Baseball",
+  "Super Auto Pets",
+  "Legends of Idleon",
+  "Cookie Clicker",
+  "Idle Champions of the Forgotten Realms",
+  "PUBG: New State",
+  "Call of Duty: Black Ops 7",
+  "Call of Duty: Black Ops Cold War",
+  "Call of Duty: Vanguard",
+  "Battlefield 6",
+  "Team Fortress 2",
+  "Quake Champions",
+  "DOOM Eternal",
+  "DOOM (2016)",
+  "Titanfall 2",
+  "CrossFire",
+  "Point Blank",
+  "Combat Master",
+  "Warface",
+  "Splitgate: Arena Reloaded",
+  "Counter-Strike Nexon: Studio",
+  "Pokemon TCG Pocket",
+  "Pokemon Masters EX",
+  "Pokemon Sleep",
+  "Yu-Gi-Oh! Master Duel",
+  "Gwent: The Witcher Card Game",
+  "Mobile Legends: Adventure",
+  "AFK Arena",
+  "AFK Journey",
+  "Arknights",
+  "Blue Archive",
+  "NIKKE: Goddess of Victory",
+  "Reverse: 1999",
+  "Solo Leveling: ARISE",
+  "Black Clover M",
+  "Marvel Strike Force",
+  "Raid: Shadow Legends",
+  "Summoners War",
+  "Ragnarok Origin",
+  "Ragnarok M: Eternal Love",
+  "LifeAfter",
+  "Undawn",
+  "Final Fantasy XVI",
+  "Final Fantasy XV",
+  "Final Fantasy VII Remake Intergrade",
+  "Dragon's Dogma 2",
+  "Kingdom Come: Deliverance II",
+  "Disco Elysium",
+  "Outer Wilds",
+  "The Outer Worlds",
+  "Dragon Age: The Veilguard",
+  "Mass Effect Legendary Edition",
+  "Dragon Age: Inquisition",
+  "Dragon Age: Origins",
+  "Divinity: Original Sin 2",
+  "Pillars of Eternity II: Deadfire",
+  "Pathfinder: Wrath of the Righteous",
+  "Yakuza: Like a Dragon",
+  "Metaphor: ReFantazio",
+  "Octopath Traveler II",
+  "Octopath Traveler",
+  "Sea of Stars",
+  "Dave the Diver",
+  "DREDGE",
+  "Brotato",
+  "V Rising",
+  "The Long Dark",
+  "Green Hell",
+  "Raft",
+  "Astroneer",
+  "Noita",
+  "Farming Simulator 22",
+  "Farming Simulator 19",
+  "The Sims 3",
+  "Planet Zoo",
+  "Planet Coaster 2",
+  "Two Point Hospital",
+  "Two Point Campus",
+  "PowerWash Simulator 2",
+  "Assetto Corsa Competizione",
+  "Assetto Corsa EVO",
+  "iRacing",
+  "NHL 26",
+  "MLB The Show 26",
+  "PGA Tour 2K25",
+  "F1 24",
+  "F1 23",
+  "F1 22",
+  "WRC 10",
+  "EA Sports WRC",
+  "MotoGP 25",
+  "SnowRunner",
+  "Dirt Rally 2.0",
+  "Dragon Ball: Sparking! ZERO",
+  "Dragon Ball FighterZ",
+  "Guilty Gear Xrd Rev 2",
+  "The King of Fighters XV",
+  "Granblue Fantasy Versus: Rising",
+  "Rivals of Aether II",
+  "Nickelodeon All-Star Brawl 2",
+  "Portal",
+  "Portal 2",
+  "The Talos Principle 2",
+  "The Witness",
+  "Baba Is You",
+  "World of Goo 2",
+  "Sonic Frontiers",
+  "Sonic Mania",
+  "Kirby and the Forgotten Land",
+  "Super Mario Odyssey",
+  "Super Mario 3D World + Bowser's Fury",
+  "Luigi's Mansion 3",
+  "Xenoblade Chronicles 3",
+  "Persona 3 Reload",
+  "Persona 5 Strikers",
+  "NieR: Automata",
+  "Bayonetta 3",
+  "Banishers: Ghosts of New Eden",
+  "Ghostrunner 2",
+  "Lords of the Fallen (2023)",
+  "Kingdom Come: Deliverance",
+  "The Binding of Isaac",
+  "Risk of Rain Returns",
+  "Returnal",
+  "Deathloop",
+  "Prey (2017)",
+  "Dishonored 2",
+  "Metro Exodus",
+  "Ori and the Blind Forest",
+  "Ori and the Will of the Wisps",
+  "The Sims 2",
+  "RollerCoaster Tycoon 3",
+  "Unrailed! 2: Back on Track",
+  "Ninja Gaiden 4",
+  "Sifu",
+  "Tunic",
+  "Fez",
+  "Firewatch",
+  "What Remains of Edith Finch",
+  "A Short Hike",
+  "Spiritfarer",
+  "Gris",
+  "Inside",
+  "Limbo",
+  "The Stanley Parable: Ultra Deluxe",
+  "Crossout",
+  "Mech Arena",
+  "World of Warships: Legends",
+  "World of Warships Blitz",
+  "Metal Slug: Awakening",
+  "Honor of Kings: World",
+  "Pokemon Quest",
+  "Pokemon Cafe ReMix",
+  "Fallout 4",
+  "Fallout 76",
+  "The Elder Scrolls V: Skyrim",
+  "Need for Speed Heat",
+  "Need for Speed Payback",
+  "Need for Speed Most Wanted",
+  "F1 Manager 2024",
+  "F1 Manager 2023",
+  "Football Manager 2025",
+  "Football Manager 2026",
+  "PES 2021",
+  "Pro Evolution Soccer 2013",
+  "EA Sports UFC 5",
+  "UFC 4",
+  "WWE 2K24",
+  "WWE 2K23",
+  "Hitman: Codename 47",
+  "Hitman 2: Silent Assassin",
+  "Hitman: Contracts",
+  "Hitman: Blood Money",
+  "Hitman: Absolution",
+  "HITMAN (2016)",
+  "HITMAN 2 (2018)",
+  "HITMAN 3 (2021)",
+  "Hitman: World of Assassination",
+  "Max Payne",
+  "Max Payne 2: The Fall of Max Payne",
+  "Max Payne 3",
+  "Fable (2004)",
+  "Fable: The Lost Chapters",
+  "Fable Anniversary",
+  "Fable II",
+  "Fable III",
+  "Tekken",
+  "Tekken 2",
+  "Tekken 3",
+  "Tekken 4",
+  "Tekken 5",
+  "Tekken 5: Dark Resurrection",
+  "Tekken 6",
+  "Tekken Tag Tournament",
+  "Tekken Tag Tournament 2",
+  "Tekken 7",
+  "Tekken Advance",
+  "Project IGI: I'm Going In",
+  "IGI 2: Covert Strike",
+  "Marvel's Spider-Man (2000)",
+  "Spider-Man 2 (2004 video game)",
+  "Ultimate Spider-Man",
+  "Spider-Man: Web of Shadows",
+  "Spider-Man: Shattered Dimensions",
+  "Spider-Man: Edge of Time",
+  "The Amazing Spider-Man (2012 video game)",
+  "The Amazing Spider-Man 2 (2014 video game)",
+  "Marvel's Spider-Man Remastered",
+  "Marvel's Spider-Man: Miles Morales",
+  "Cadillacs and Dinosaurs",
+  "The Punisher (1993 arcade game)",
+  "Alien vs. Predator (1994 arcade game)",
+  "Final Fight",
+  "Golden Axe",
+  "Golden Axe II",
+  "Streets of Rage",
+  "Streets of Rage 2",
+  "Streets of Rage 3",
+  "Streets of Rage 4",
+  "Double Dragon",
+  "Double Dragon II: The Revenge",
+  "Double Dragon III: The Rosetta Stone",
+  "The Simpsons Arcade Game",
+  "X-Men (1992 arcade game)",
+  "Teenage Mutant Ninja Turtles: Turtles in Time",
+  "Sunset Riders",
+  "Snow Bros.",
+  "Bubble Bobble",
+  "Contra",
+  "Super Contra",
+  "Contra III: The Alien Wars",
+  "Contra: Hard Corps",
+  "Contra: Shattered Soldier",
+  "Contra 4",
+  "Metal Slug",
+  "Metal Slug 2",
+  "Metal Slug X",
+  "Metal Slug 3",
+  "Metal Slug 4",
+  "Metal Slug 5",
+  "Metal Slug 6",
+  "Metal Slug XX",
+  "Prince of Persia (1989)",
+  "Prince of Persia 2: The Shadow and the Flame",
+  "Prince of Persia: The Sands of Time",
+  "Prince of Persia: Warrior Within",
+  "Prince of Persia: The Two Thrones",
+  "Prince of Persia: The Forgotten Sands",
+  "Prince of Persia (2008)",
+  "Prince of Persia: The Lost Crown",
+  "Tom Clancy's Splinter Cell",
+  "Tom Clancy's Splinter Cell: Pandora Tomorrow",
+  "Tom Clancy's Splinter Cell: Chaos Theory",
+  "Tom Clancy's Splinter Cell: Double Agent",
+  "Tom Clancy's Splinter Cell: Conviction",
+  "Tom Clancy's Splinter Cell: Blacklist",
+  "Grand Theft Auto III",
+  "Grand Theft Auto: Vice City",
+  "Grand Theft Auto: San Andreas",
+  "Grand Theft Auto: Liberty City Stories",
+  "Grand Theft Auto: Vice City Stories",
+  "Grand Theft Auto: Chinatown Wars",
+  "Grand Theft Auto IV",
+  "Grand Theft Auto: Episodes from Liberty City",
+  "Bully: Scholarship Edition",
+  "Manhunt",
+  "Manhunt 2",
+  "Mafia: The City of Lost Heaven",
+  "Mafia II",
+  "Mafia III",
+  "Mafia: Definitive Edition",
+  "Mafia II: Definitive Edition",
+  "L.A. Noire",
+  "Need for Speed: Underground",
+  "Need for Speed: Underground 2",
+  "Need for Speed: Most Wanted (2005)",
+  "Need for Speed: Carbon",
+  "Need for Speed: ProStreet",
+  "Need for Speed: Undercover",
+  "Need for Speed: Shift",
+  "Need for Speed: Shift 2 Unleashed",
+  "Need for Speed: Hot Pursuit (2010)",
+  "Need for Speed: The Run",
+  "Need for Speed: Rivals",
+  "Need for Speed (2015)",
+  "Need for Speed: Payback",
+  "Need for Speed: Heat",
+  "Road Rash",
+  "Midtown Madness",
+  "Midtown Madness 2",
+  "Midnight Club: Street Racing",
+  "Midnight Club II",
+  "Midnight Club 3: DUB Edition",
+  "Burnout 3: Takedown",
+  "Burnout Revenge",
+  "Burnout Paradise",
+  "Driver",
+  "Driver 2",
+  "Driver: San Francisco",
+  "FlatOut 2",
+  "WWE SmackDown! Here Comes the Pain",
+  "WWE SmackDown! Shut Your Mouth",
+  "WWE SmackDown vs. Raw 2006",
+  "WWE SmackDown vs. Raw 2007",
+  "WWE SmackDown vs. Raw 2008",
+  "WWE SmackDown vs. Raw 2011",
+  "WWE All Stars",
+  "Def Jam: Fight for NY",
+  "Def Jam Vendetta",
+  "Bloody Roar",
+  "Bloody Roar 2",
+  "Bloody Roar 3",
+  "Soulcalibur",
+  "Soulcalibur II",
+  "Soulcalibur III",
+  "Soulcalibur IV",
+  "Soulcalibur V",
+  "Soulcalibur VI",
+  "Virtua Fighter 5: Ultimate Showdown",
+  "Mortal Kombat Trilogy",
+  "Mortal Kombat 4",
+  "Mortal Kombat: Shaolin Monks",
+  "Mortal Kombat: Deception",
+  "Mortal Kombat: Armageddon",
+  "Street Fighter II: Champion Edition",
+  "Super Street Fighter II Turbo",
+  "Street Fighter Alpha 3",
+  "Street Fighter III: 3rd Strike",
+  "Marvel vs. Capcom 2",
+  "Capcom vs. SNK 2",
+  "God of War (2005)",
+  "God of War II",
+  "God of War: Chains of Olympus",
+  "God of War: Ghost of Sparta",
+  "God of War: Ascension",
+  "God of War III",
+  "Metal Gear Solid",
+  "Metal Gear Solid 2: Sons of Liberty",
+  "Metal Gear Solid 3: Snake Eater",
+  "Metal Gear Solid 4: Guns of the Patriots",
+  "Metal Gear Solid: Peace Walker",
+  "Metal Gear Solid V: Ground Zeroes",
+  "Metal Gear Solid V: The Phantom Pain",
+  "Devil May Cry",
+  "Devil May Cry 2",
+  "Devil May Cry 3: Dante's Awakening",
+  "Devil May Cry 4",
+  "DmC: Devil May Cry",
+  "Devil May Cry 5",
+  "Tomb Raider (1996)",
+  "Tomb Raider II",
+  "Tomb Raider III: Adventures of Lara Croft",
+  "Tomb Raider: The Last Revelation",
+  "Tomb Raider: Chronicles",
+  "Tomb Raider: The Angel of Darkness",
+  "Tomb Raider: Legend",
+  "Tomb Raider: Anniversary",
+  "Tomb Raider: Underworld",
+  "Tomb Raider (2013)",
+  "Rise of the Tomb Raider",
+  "Shadow of the Tomb Raider",
+  "Batman: Arkham Asylum",
+  "Batman: Arkham City",
+  "Batman: Arkham Origins",
+  "Batman: Arkham Knight",
+  "Far Cry",
+  "Far Cry 2",
+  "Far Cry 3",
+  "Far Cry 3: Blood Dragon",
+  "Far Cry 4",
+  "Call of Duty (2003)",
+  "Call of Duty 2",
+  "Call of Duty 4: Modern Warfare (2007)",
+  "Call of Duty: Modern Warfare 2 (2009)",
+  "Call of Duty: Modern Warfare 3 (2011)",
+  "Call of Duty: World at War",
+  "Call of Duty: Black Ops",
+  "Call of Duty: Black Ops II",
+  "Half-Life",
+  "Half-Life: Opposing Force",
+  "Half-Life: Blue Shift",
+  "Half-Life 2",
+  "Half-Life 2: Episode One",
+  "Half-Life 2: Episode Two",
+  "Counter-Strike 1.6",
+  "Counter-Strike: Condition Zero",
+  "Counter-Strike: Source",
+  "Team Fortress Classic",
+  "Quake",
+  "Quake II",
+  "Quake III Arena",
+  "Unreal Tournament (1999)",
+  "Unreal Tournament 2004",
+  "BioShock",
+  "BioShock 2",
+  "BioShock Infinite",
+  "Deus Ex",
+  "Deus Ex: Human Revolution",
+  "Thief: The Dark Project",
+  "Thief II: The Metal Age",
+  "System Shock 2",
+  "Command & Conquer",
+  "Command & Conquer: Red Alert",
+  "Command & Conquer: Red Alert 2",
+  "Command & Conquer: Generals",
+  "Command & Conquer: Generals – Zero Hour",
+  "Command & Conquer 3: Tiberium Wars",
+  "Command & Conquer: Red Alert 3",
+  "Age of Empires II: Definitive Edition",
+  "Age of Mythology",
+  "Age of Mythology: Extended Edition",
+  "Stronghold Crusader",
+  "Stronghold Crusader HD",
+  "Warcraft III: The Frozen Throne",
+  "Diablo",
+  "Diablo II: Resurrected",
+  "Baldur's Gate",
+  "Baldur's Gate II: Shadows of Amn",
+  "Planescape: Torment",
+  "Icewind Dale",
+  "Neverwinter Nights",
+  "Gothic",
+  "Gothic II",
+  "Gothic 3",
+  "Star Wars: Knights of the Old Republic",
+  "Star Wars: Knights of the Old Republic II",
+  "Mass Effect",
+  "Mass Effect 2",
+  "Mass Effect 3",
+  "Dragon Age II",
+  "Fallout",
+  "Fallout 2",
+  "Fallout: New Vegas",
+  "The Elder Scrolls III: Morrowind",
+  "The Elder Scrolls IV: Oblivion",
+  "The Elder Scrolls V: Skyrim Special Edition",
+  "Final Fantasy VII (1997)",
+  "Final Fantasy VIII",
+  "Final Fantasy IX",
+  "Final Fantasy X",
+  "Final Fantasy XII",
+  "Chrono Trigger",
+  "Chrono Cross",
+  "Suikoden II",
+  "Kingdom Hearts",
+  "Kingdom Hearts II",
+  "Shenmue",
+  "Shenmue II",
+  "Crash Bandicoot",
+  "Crash Bandicoot 2: Cortex Strikes Back",
+  "Crash Bandicoot: Warped",
+  "Crash Team Racing: Nitro-Fueled",
+  "Spyro the Dragon",
+  "Spyro 2: Ripto's Rage!",
+  "Spyro: Year of the Dragon",
+  "Rayman 2: The Great Escape",
+  "Rayman 3: Hoodlum Havoc",
+  "Rayman Legends",
+  "Jak and Daxter: The Precursor Legacy",
+  "Ratchet & Clank (2002)",
+  "Sly Cooper and the Thievius Raccoonus",
+  "LittleBigPlanet",
+  "LittleBigPlanet 2",
+  "Sonic the Hedgehog 2",
+  "Sonic the Hedgehog 3 & Knuckles",
+  "Mega Man 2",
+  "Mega Man X",
+  "Castlevania: Symphony of the Night",
+  "Metroid Prime",
+  "Super Metroid",
+  "The Legend of Zelda: Ocarina of Time",
+  "The Legend of Zelda: Majora's Mask",
+  "The Legend of Zelda: The Wind Waker",
+  "The Legend of Zelda: Twilight Princess",
+  "Super Mario World",
+  "Super Mario 64",
+  "Super Mario Bros. 3",
+  "Donkey Kong Country",
+  "Pokémon Red and Blue",
+  "Pokémon Gold and Silver",
+  "Pokémon Emerald",
+  "Pokémon FireRed and LeafGreen",
+  "Pokémon Platinum",
+  "Pokémon HeartGold and SoulSilver",
+  "Pokémon Black and White",
+  "Pokémon X and Y",
+  "Pokémon Omega Ruby and Alpha Sapphire",
+  "Pokémon Sun and Moon",
+  "Tetris (1984)",
+  "Pac-Man",
+  "Galaga",
+  "Space Invaders",
+  "Donkey Kong (1981)",
+  "Doom (1993)",
+  "Doom II",
+  "Duke Nukem 3D",
+  "Wolfenstein 3D",
+  "Return to Castle Wolfenstein",
+  "Serious Sam: The First Encounter",
+  "Serious Sam: The Second Encounter",
+  "Painkiller (2004)",
+  "Postal 2",
+  "The Operative: No One Lives Forever",
+  "Max Payne Mobile",
+  "Guitar Hero III: Legends of Rock",
+  "Guitar Hero World Tour",
+  "Rock Band 2",
+  "Dance Dance Revolution",
+  "Guitar Freaks",
+  "Beatmania IIDX",
+  "Angry Birds Classic",
+  "Fruit Ninja",
+  "Jetpack Joyride",
+  "Temple Run",
+  "Temple Run 2",
+  "Subway Surfers",
+  "Doodle Jump",
+  "Plants vs. Zombies (2009)",
+  "Shadow Fight 2",
+  "Shadow Fight 3",
+  "Vector",
+  "Dead Trigger 2",
+  "Asphalt 8: Airborne",
+  "Gangstar Vegas",
+  "Modern Combat 4: Zero Hour",
+  "Modern Combat 5: Blackout",
+  "Hill Climb Racing",
+  "Hill Climb Racing 2",
+  "Cut the Rope",
+  "Where's My Water?",
+  "Bejeweled 3",
+  "Peggle Deluxe",
+  "Pajama Sam: No Need to Hide When It's Dark Outside",
+  "Freddi Fish and the Case of the Missing Kelp Seeds",
+  "Putt-Putt Joins the Parade",
+  "The Oregon Trail",
+  "SimCity 3000",
+  "SimCity 4",
+  "RollerCoaster Tycoon Classic",
+  "Zoo Tycoon",
+  "Theme Hospital",
+  "Theme Park World",
+  "Lemmings",
+  "The Incredible Machine",
+  "Carmageddon",
+  "Test Drive Unlimited",
+  "Colin McRae Rally 2005",
+  "Richard Burns Rally",
+  "FIFA Street",
+  "FIFA Street 2",
+  "FIFA Street 3",
+  "Pro Evolution Soccer 6",
+  "Winning Eleven 9",
+  "NBA Street Vol. 2",
+  "NFL Street 2",
+  "Fight Night Round 3",
+  "Virtua Tennis 3",
+  "Top Spin 4",
+  "Tony Hawk's Pro Skater 2",
+  "Tony Hawk's Underground",
+  "Tony Hawk's Underground 2",
+  "SSX 3",
+  "SSX Tricky",
+  "Skate 2",
+  "Skate 3",
+  "Prince of Persia: The Sands of Time (Classic)",
+  "The Incredible Hulk: Ultimate Destruction",
+  "Hulk (2003 video game)",
+  "The Warriors (video game)",
+  "Scarface: The World Is Yours",
+  "The Godfather (2006 video game)",
+  "The Godfather II (video game)",
+  "Transformers: War for Cybertron",
+  "Transformers: Fall of Cybertron",
+  "The Lord of the Rings: The Return of the King (video game)",
+  "The Lord of the Rings: The Two Towers (video game)",
+  "Harry Potter and the Chamber of Secrets (video game)",
+  "Harry Potter and the Prisoner of Azkaban (video game)",
+  "Harry Potter and the Goblet of Fire (video game)",
+  "Harry Potter and the Order of the Phoenix (video game)",
+  "James Bond 007: Nightfire",
+  "James Bond 007: Everything or Nothing",
+  "GoldenEye 007",
+  "Perfect Dark",
+  "TimeSplitters 2",
+  "TimeSplitters: Future Perfect",
+  "Red Faction",
+  "Red Faction II",
+  "Red Faction: Guerrilla",
+  "Mercenaries: Playground of Destruction",
+  "Mercenaries 2: World in Flames",
+  "Just Cause",
+  "Just Cause 2",
+  "Saints Row 2",
+  "Saints Row: The Third",
+  "Prototype",
+  "Prototype 2",
+  "inFAMOUS",
+  "inFAMOUS 2",
+  "Resistance: Fall of Man",
+  "Resistance 2",
+  "Killzone 2",
+  "Killzone 3",
+  "MotorStorm",
+  "MotorStorm: Pacific Rift",
+  "Blur (2010 video game)",
+  "Split/Second",
+  "Pure (2008 video game)",
+  "The Saboteur",
+  "Spec Ops: The Line",
+  "Brothers in Arms: Road to Hill 30",
+  "Brothers in Arms: Earned in Blood",
+  "Medal of Honor: Allied Assault",
+  "Medal of Honor: Frontline",
+  "Medal of Honor: Pacific Assault",
+  "Battlefield 2",
+  "Battlefield: Bad Company 2",
+  "Battlefield 3",
+  "Battlefield 4",
+  "Commandos: Behind Enemy Lines",
+  "Commandos 2: Men of Courage",
+  "Desperados: Wanted Dead or Alive",
+  "Freedom Fighters (2003 video game)",
+  "Kane & Lynch: Dead Men",
+  "Kane & Lynch 2: Dog Days",
+  "The Chronicles of Riddick: Escape from Butcher Bay",
+  "The Chronicles of Riddick: Assault on Dark Athena",
+  "Onimusha: Warlords",
+  "Onimusha 2: Samurai's Destiny",
+  "Okami",
+  "Viewtiful Joe",
+  "Ōkami HD",
+  "Ōkami (2006)",
+  "Bionic Commando Rearmed",
+  "Ikaruga",
+  "Gradius V",
+  "R-Type Final",
+  "Twisted Metal: Black",
+  "Vigilante 8",
+  "Chakan: The Forever Man",
+  "Comix Zone",
+  "Earthworm Jim",
+  "Aladdin (1993 video game)",
+  "The Lion King (1994 video game)",
+  "Mickey Mania: The Timeless Adventures of Mickey Mouse",
+  "Teenage Mutant Ninja Turtles: The Hyperstone Heist",
+  "Teenage Mutant Ninja Turtles: Shredder's Revenge",
+  "Cadillacs and Dinosaurs (Arcade)",
+  "The King of Fighters '98",
+  "The King of Fighters 2002",
+  "Samurai Shodown II",
+  "Samurai Shodown V Special",
+  "Fatal Fury: Mark of the Wolves",
+  "Art of Fighting 2",
+  "Killer Instinct (1994)",
+  "Killer Instinct (2013)",
+  "Primal Rage",
+  "Power Stone",
+  "Power Stone 2",
+  "The House of the Dead",
+  "The House of the Dead 2",
+  "Time Crisis",
+  "Time Crisis II",
+  "Virtua Cop 2",
+  "Dino Crisis",
+  "Dino Crisis 2",
+  "Onimusha 3: Demon Siege",
+  "Resident Evil (1996)",
+  "Resident Evil 2 (1998)",
+  "Resident Evil 3: Nemesis",
+  "Resident Evil Code: Veronica",
+  "Resident Evil 4 (2005)",
+  "Resident Evil 5",
+  "Resident Evil 6",
+  "Resident Evil Zero",
+  "Silent Hill (1999)",
+  "Silent Hill 2 (2001)",
+  "Silent Hill 3",
+  "Silent Hill 4: The Room",
+  "Fatal Frame II: Crimson Butterfly",
+  "Fatal Frame III: The Tormented",
+  "Clock Tower 3",
+  "Rule of Rose",
+  "Haunting Ground",
+  "The Suffering",
+  "The Suffering: Ties That Bind",
+  "Condemned: Criminal Origins",
+  "F.E.A.R. (2005)",
+  "F.E.A.R. 2: Project Origin",
+  "Alan Wake (2010)",
+  "Dead Space (2008)",
+  "Dead Space 2",
+  "Dead Space 3",
+  "Darksiders",
+  "Darksiders II",
+  "Darksiders III",
+  "Braid",
+  "Spelunky",
+  "FTL: Faster Than Light",
+  "Papers, Please",
+  "Pony Island",
+  "World of Warcraft: Classic",
+  "RuneScape (Old School)",
+  "MapleStory",
+  "Ragnarok Online",
+  "Silkroad Online",
+  "MU Online",
+  "Lineage II",
+  "Priston Tale",
+  "Flyff (Fly for Fun)",
+  "Tibia",
+  "AdventureQuest Worlds",
+  "Club Penguin (legacy / fan community)",
+  "Habbo",
+  "Second Life",
 ];
 
-export default function Games() {
+type UpcomingGame = { name: string; date: string; platforms: string };
+const upcomingGames: UpcomingGame[] = [
+  {
+    "name": "Phantom Blade Zero",
+    "date": "October 29, 2026",
+    "platforms": "PC, PlayStation 5"
+  },
+  {
+    "name": "The Wolf Among Us Remastered",
+    "date": "October 29, 2026",
+    "platforms": "PC, consoles"
+  },
+  {
+    "name": "Hello Kitty Party Land",
+    "date": "October 29, 2026",
+    "platforms": "Nintendo Switch family"
+  },
+  {
+    "name": "Grand Theft Auto VI",
+    "date": "November 19, 2026",
+    "platforms": "PlayStation 5, Xbox Series X|S"
+  },
+  {
+    "name": "Hela",
+    "date": "December 1, 2026",
+    "platforms": "PC, consoles"
+  },
+  {
+    "name": "Dragon Quest Monsters: The Withered World",
+    "date": "December 3, 2026",
+    "platforms": "PC, consoles"
+  },
+  {
+    "name": "Warhammer 40,000: Dawn of War IV",
+    "date": "December 3, 2026",
+    "platforms": "PC"
+  },
+  {
+    "name": "Professor Layton and the New World of Steam",
+    "date": "December 10, 2026",
+    "platforms": "Consoles, PC"
+  },
+  {
+    "name": "Attack on Titan 3",
+    "date": "December 10, 2026",
+    "platforms": "PC, consoles"
+  }
+];
+
+const classicGames = new Set<string>([
+  "Hitman: Codename 47",
+  "Hitman 2: Silent Assassin",
+  "Hitman: Contracts",
+  "Hitman: Blood Money",
+  "Hitman: Absolution",
+  "HITMAN (2016)",
+  "HITMAN 2 (2018)",
+  "HITMAN 3 (2021)",
+  "Hitman: World of Assassination",
+  "Max Payne",
+  "Max Payne 2: The Fall of Max Payne",
+  "Max Payne 3",
+  "Fable (2004)",
+  "Fable: The Lost Chapters",
+  "Fable Anniversary",
+  "Fable II",
+  "Fable III",
+  "Tekken",
+  "Tekken 2",
+  "Tekken 3",
+  "Tekken 4",
+  "Tekken 5",
+  "Tekken 5: Dark Resurrection",
+  "Tekken 6",
+  "Tekken Tag Tournament",
+  "Tekken Tag Tournament 2",
+  "Tekken 7",
+  "Tekken Advance",
+  "Project IGI: I'm Going In",
+  "IGI 2: Covert Strike",
+  "Marvel's Spider-Man (2000)",
+  "Spider-Man 2 (2004 video game)",
+  "Ultimate Spider-Man",
+  "Spider-Man: Web of Shadows",
+  "Spider-Man: Shattered Dimensions",
+  "Spider-Man: Edge of Time",
+  "The Amazing Spider-Man (2012 video game)",
+  "The Amazing Spider-Man 2 (2014 video game)",
+  "Marvel's Spider-Man Remastered",
+  "Marvel's Spider-Man: Miles Morales",
+  "Marvel's Spider-Man 2",
+  "Cadillacs and Dinosaurs",
+  "The Punisher (1993 arcade game)",
+  "Alien vs. Predator (1994 arcade game)",
+  "Final Fight",
+  "Golden Axe",
+  "Golden Axe II",
+  "Streets of Rage",
+  "Streets of Rage 2",
+  "Streets of Rage 3",
+  "Streets of Rage 4",
+  "Double Dragon",
+  "Double Dragon II: The Revenge",
+  "Double Dragon III: The Rosetta Stone",
+  "The Simpsons Arcade Game",
+  "X-Men (1992 arcade game)",
+  "Teenage Mutant Ninja Turtles: Turtles in Time",
+  "Sunset Riders",
+  "Snow Bros.",
+  "Bubble Bobble",
+  "Contra",
+  "Super Contra",
+  "Contra III: The Alien Wars",
+  "Contra: Hard Corps",
+  "Contra: Shattered Soldier",
+  "Contra 4",
+  "Metal Slug",
+  "Metal Slug 2",
+  "Metal Slug X",
+  "Metal Slug 3",
+  "Metal Slug 4",
+  "Metal Slug 5",
+  "Metal Slug 6",
+  "Metal Slug XX",
+  "Prince of Persia (1989)",
+  "Prince of Persia 2: The Shadow and the Flame",
+  "Prince of Persia: The Sands of Time",
+  "Prince of Persia: Warrior Within",
+  "Prince of Persia: The Two Thrones",
+  "Prince of Persia: The Forgotten Sands",
+  "Prince of Persia (2008)",
+  "Prince of Persia: The Lost Crown",
+  "Tom Clancy's Splinter Cell",
+  "Tom Clancy's Splinter Cell: Pandora Tomorrow",
+  "Tom Clancy's Splinter Cell: Chaos Theory",
+  "Tom Clancy's Splinter Cell: Double Agent",
+  "Tom Clancy's Splinter Cell: Conviction",
+  "Tom Clancy's Splinter Cell: Blacklist",
+  "Grand Theft Auto III",
+  "Grand Theft Auto: Vice City",
+  "Grand Theft Auto: San Andreas",
+  "Grand Theft Auto: Liberty City Stories",
+  "Grand Theft Auto: Vice City Stories",
+  "Grand Theft Auto: Chinatown Wars",
+  "Grand Theft Auto IV",
+  "Grand Theft Auto: Episodes from Liberty City",
+  "Bully: Scholarship Edition",
+  "Manhunt",
+  "Manhunt 2",
+  "Mafia: The City of Lost Heaven",
+  "Mafia II",
+  "Mafia III",
+  "Mafia: Definitive Edition",
+  "Mafia II: Definitive Edition",
+  "L.A. Noire",
+  "Need for Speed: Underground",
+  "Need for Speed: Underground 2",
+  "Need for Speed: Most Wanted (2005)",
+  "Need for Speed: Carbon",
+  "Need for Speed: ProStreet",
+  "Need for Speed: Undercover",
+  "Need for Speed: Shift",
+  "Need for Speed: Shift 2 Unleashed",
+  "Need for Speed: Hot Pursuit (2010)",
+  "Need for Speed: The Run",
+  "Need for Speed: Rivals",
+  "Need for Speed (2015)",
+  "Need for Speed: Payback",
+  "Need for Speed: Heat",
+  "Road Rash",
+  "Midtown Madness",
+  "Midtown Madness 2",
+  "Midnight Club: Street Racing",
+  "Midnight Club II",
+  "Midnight Club 3: DUB Edition",
+  "Burnout 3: Takedown",
+  "Burnout Revenge",
+  "Burnout Paradise",
+  "Driver",
+  "Driver 2",
+  "Driver: San Francisco",
+  "FlatOut 2",
+  "WWE SmackDown! Here Comes the Pain",
+  "WWE SmackDown! Shut Your Mouth",
+  "WWE SmackDown vs. Raw 2006",
+  "WWE SmackDown vs. Raw 2007",
+  "WWE SmackDown vs. Raw 2008",
+  "WWE SmackDown vs. Raw 2011",
+  "WWE All Stars",
+  "Def Jam: Fight for NY",
+  "Def Jam Vendetta",
+  "Bloody Roar",
+  "Bloody Roar 2",
+  "Bloody Roar 3",
+  "Soulcalibur",
+  "Soulcalibur II",
+  "Soulcalibur III",
+  "Soulcalibur IV",
+  "Soulcalibur V",
+  "Soulcalibur VI",
+  "Virtua Fighter 5: Ultimate Showdown",
+  "Mortal Kombat Trilogy",
+  "Mortal Kombat 4",
+  "Mortal Kombat: Shaolin Monks",
+  "Mortal Kombat: Deception",
+  "Mortal Kombat: Armageddon",
+  "Street Fighter II: Champion Edition",
+  "Super Street Fighter II Turbo",
+  "Street Fighter Alpha 3",
+  "Street Fighter III: 3rd Strike",
+  "Marvel vs. Capcom 2",
+  "Capcom vs. SNK 2",
+  "God of War (2005)",
+  "God of War II",
+  "God of War: Chains of Olympus",
+  "God of War: Ghost of Sparta",
+  "God of War: Ascension",
+  "God of War III",
+  "Metal Gear Solid",
+  "Metal Gear Solid 2: Sons of Liberty",
+  "Metal Gear Solid 3: Snake Eater",
+  "Metal Gear Solid 4: Guns of the Patriots",
+  "Metal Gear Solid: Peace Walker",
+  "Metal Gear Solid V: Ground Zeroes",
+  "Metal Gear Solid V: The Phantom Pain",
+  "Devil May Cry",
+  "Devil May Cry 2",
+  "Devil May Cry 3: Dante's Awakening",
+  "Devil May Cry 4",
+  "DmC: Devil May Cry",
+  "Devil May Cry 5",
+  "Tomb Raider (1996)",
+  "Tomb Raider II",
+  "Tomb Raider III: Adventures of Lara Croft",
+  "Tomb Raider: The Last Revelation",
+  "Tomb Raider: Chronicles",
+  "Tomb Raider: The Angel of Darkness",
+  "Tomb Raider: Legend",
+  "Tomb Raider: Anniversary",
+  "Tomb Raider: Underworld",
+  "Tomb Raider (2013)",
+  "Rise of the Tomb Raider",
+  "Shadow of the Tomb Raider",
+  "Batman: Arkham Asylum",
+  "Batman: Arkham City",
+  "Batman: Arkham Origins",
+  "Batman: Arkham Knight",
+  "Far Cry",
+  "Far Cry 2",
+  "Far Cry 3",
+  "Far Cry 3: Blood Dragon",
+  "Far Cry 4",
+  "Call of Duty (2003)",
+  "Call of Duty 2",
+  "Call of Duty 4: Modern Warfare (2007)",
+  "Call of Duty: Modern Warfare 2 (2009)",
+  "Call of Duty: Modern Warfare 3 (2011)",
+  "Call of Duty: World at War",
+  "Call of Duty: Black Ops",
+  "Call of Duty: Black Ops II",
+  "Half-Life",
+  "Half-Life: Opposing Force",
+  "Half-Life: Blue Shift",
+  "Half-Life 2",
+  "Half-Life 2: Episode One",
+  "Half-Life 2: Episode Two",
+  "Counter-Strike 1.6",
+  "Counter-Strike: Condition Zero",
+  "Counter-Strike: Source",
+  "Team Fortress Classic",
+  "Quake",
+  "Quake II",
+  "Quake III Arena",
+  "Unreal Tournament (1999)",
+  "Unreal Tournament 2004",
+  "BioShock",
+  "BioShock 2",
+  "BioShock Infinite",
+  "Deus Ex",
+  "Deus Ex: Human Revolution",
+  "Thief: The Dark Project",
+  "Thief II: The Metal Age",
+  "System Shock 2",
+  "Command & Conquer",
+  "Command & Conquer: Red Alert",
+  "Command & Conquer: Red Alert 2",
+  "Command & Conquer: Generals",
+  "Command & Conquer: Generals – Zero Hour",
+  "Command & Conquer 3: Tiberium Wars",
+  "Command & Conquer: Red Alert 3",
+  "Age of Empires II: Definitive Edition",
+  "Age of Mythology",
+  "Age of Mythology: Extended Edition",
+  "Stronghold Crusader",
+  "Stronghold Crusader HD",
+  "Warcraft III: The Frozen Throne",
+  "Diablo",
+  "Diablo II: Resurrected",
+  "Baldur's Gate",
+  "Baldur's Gate II: Shadows of Amn",
+  "Planescape: Torment",
+  "Icewind Dale",
+  "Neverwinter Nights",
+  "Gothic",
+  "Gothic II",
+  "Gothic 3",
+  "Star Wars: Knights of the Old Republic",
+  "Star Wars: Knights of the Old Republic II",
+  "Mass Effect",
+  "Mass Effect 2",
+  "Mass Effect 3",
+  "Dragon Age: Origins",
+  "Dragon Age II",
+  "Dragon Age: Inquisition",
+  "Fallout",
+  "Fallout 2",
+  "Fallout: New Vegas",
+  "The Elder Scrolls III: Morrowind",
+  "The Elder Scrolls IV: Oblivion",
+  "The Elder Scrolls V: Skyrim Special Edition",
+  "Final Fantasy VII (1997)",
+  "Final Fantasy VIII",
+  "Final Fantasy IX",
+  "Final Fantasy X",
+  "Final Fantasy XII",
+  "Chrono Trigger",
+  "Chrono Cross",
+  "Suikoden II",
+  "Kingdom Hearts",
+  "Kingdom Hearts II",
+  "Shenmue",
+  "Shenmue II",
+  "Crash Bandicoot",
+  "Crash Bandicoot 2: Cortex Strikes Back",
+  "Crash Bandicoot: Warped",
+  "Crash Team Racing: Nitro-Fueled",
+  "Spyro the Dragon",
+  "Spyro 2: Ripto's Rage!",
+  "Spyro: Year of the Dragon",
+  "Rayman 2: The Great Escape",
+  "Rayman 3: Hoodlum Havoc",
+  "Rayman Legends",
+  "Jak and Daxter: The Precursor Legacy",
+  "Ratchet & Clank (2002)",
+  "Sly Cooper and the Thievius Raccoonus",
+  "LittleBigPlanet",
+  "LittleBigPlanet 2",
+  "Sonic the Hedgehog 2",
+  "Sonic the Hedgehog 3 & Knuckles",
+  "Mega Man 2",
+  "Mega Man X",
+  "Castlevania: Symphony of the Night",
+  "Metroid Prime",
+  "Super Metroid",
+  "The Legend of Zelda: Ocarina of Time",
+  "The Legend of Zelda: Majora's Mask",
+  "The Legend of Zelda: The Wind Waker",
+  "The Legend of Zelda: Twilight Princess",
+  "Super Mario World",
+  "Super Mario 64",
+  "Super Mario Bros. 3",
+  "Donkey Kong Country",
+  "Pokémon Red and Blue",
+  "Pokémon Gold and Silver",
+  "Pokémon Emerald",
+  "Pokémon FireRed and LeafGreen",
+  "Pokémon Platinum",
+  "Pokémon HeartGold and SoulSilver",
+  "Pokémon Black and White",
+  "Pokémon X and Y",
+  "Pokémon Omega Ruby and Alpha Sapphire",
+  "Pokémon Sun and Moon",
+  "Tetris (1984)",
+  "Pac-Man",
+  "Galaga",
+  "Space Invaders",
+  "Donkey Kong (1981)",
+  "Doom (1993)",
+  "Doom II",
+  "Duke Nukem 3D",
+  "Wolfenstein 3D",
+  "Return to Castle Wolfenstein",
+  "Serious Sam: The First Encounter",
+  "Serious Sam: The Second Encounter",
+  "Painkiller (2004)",
+  "Postal 2",
+  "The Operative: No One Lives Forever",
+  "Max Payne Mobile",
+  "Guitar Hero III: Legends of Rock",
+  "Guitar Hero World Tour",
+  "Rock Band 2",
+  "Dance Dance Revolution",
+  "Guitar Freaks",
+  "Beatmania IIDX",
+  "Angry Birds Classic",
+  "Fruit Ninja",
+  "Jetpack Joyride",
+  "Temple Run",
+  "Temple Run 2",
+  "Subway Surfers",
+  "Doodle Jump",
+  "Plants vs. Zombies (2009)",
+  "Plants vs. Zombies 2",
+  "Shadow Fight 2",
+  "Shadow Fight 3",
+  "Vector",
+  "Dead Trigger 2",
+  "Asphalt 8: Airborne",
+  "Gangstar Vegas",
+  "Modern Combat 4: Zero Hour",
+  "Modern Combat 5: Blackout",
+  "Hill Climb Racing",
+  "Hill Climb Racing 2",
+  "Cut the Rope",
+  "Where's My Water?",
+  "Bejeweled 3",
+  "Peggle Deluxe",
+  "Pajama Sam: No Need to Hide When It's Dark Outside",
+  "Freddi Fish and the Case of the Missing Kelp Seeds",
+  "Putt-Putt Joins the Parade",
+  "The Oregon Trail",
+  "SimCity 3000",
+  "SimCity 4",
+  "RollerCoaster Tycoon Classic",
+  "Zoo Tycoon",
+  "Theme Hospital",
+  "Theme Park World",
+  "Lemmings",
+  "The Incredible Machine",
+  "Carmageddon",
+  "Test Drive Unlimited",
+  "Colin McRae Rally 2005",
+  "Richard Burns Rally",
+  "FIFA Street",
+  "FIFA Street 2",
+  "FIFA Street 3",
+  "Pro Evolution Soccer 6",
+  "Winning Eleven 9",
+  "NBA Street Vol. 2",
+  "NFL Street 2",
+  "Fight Night Round 3",
+  "Virtua Tennis 3",
+  "Top Spin 4",
+  "Tony Hawk's Pro Skater 2",
+  "Tony Hawk's Underground",
+  "Tony Hawk's Underground 2",
+  "SSX 3",
+  "SSX Tricky",
+  "Skate 2",
+  "Skate 3",
+  "Prince of Persia: The Sands of Time (Classic)",
+  "The Incredible Hulk: Ultimate Destruction",
+  "Hulk (2003 video game)",
+  "The Warriors (video game)",
+  "Scarface: The World Is Yours",
+  "The Godfather (2006 video game)",
+  "The Godfather II (video game)",
+  "Transformers: War for Cybertron",
+  "Transformers: Fall of Cybertron",
+  "The Lord of the Rings: The Return of the King (video game)",
+  "The Lord of the Rings: The Two Towers (video game)",
+  "Harry Potter and the Chamber of Secrets (video game)",
+  "Harry Potter and the Prisoner of Azkaban (video game)",
+  "Harry Potter and the Goblet of Fire (video game)",
+  "Harry Potter and the Order of the Phoenix (video game)",
+  "James Bond 007: Nightfire",
+  "James Bond 007: Everything or Nothing",
+  "GoldenEye 007",
+  "Perfect Dark",
+  "TimeSplitters 2",
+  "TimeSplitters: Future Perfect",
+  "Red Faction",
+  "Red Faction II",
+  "Red Faction: Guerrilla",
+  "Mercenaries: Playground of Destruction",
+  "Mercenaries 2: World in Flames",
+  "Just Cause",
+  "Just Cause 2",
+  "Saints Row 2",
+  "Saints Row: The Third",
+  "Prototype",
+  "Prototype 2",
+  "inFAMOUS",
+  "inFAMOUS 2",
+  "Resistance: Fall of Man",
+  "Resistance 2",
+  "Killzone 2",
+  "Killzone 3",
+  "MotorStorm",
+  "MotorStorm: Pacific Rift",
+  "Blur (2010 video game)",
+  "Split/Second",
+  "Pure (2008 video game)",
+  "The Saboteur",
+  "Spec Ops: The Line",
+  "Brothers in Arms: Road to Hill 30",
+  "Brothers in Arms: Earned in Blood",
+  "Medal of Honor: Allied Assault",
+  "Medal of Honor: Frontline",
+  "Medal of Honor: Pacific Assault",
+  "Battlefield 2",
+  "Battlefield: Bad Company 2",
+  "Battlefield 3",
+  "Battlefield 4",
+  "Commandos: Behind Enemy Lines",
+  "Commandos 2: Men of Courage",
+  "Desperados: Wanted Dead or Alive",
+  "Freedom Fighters (2003 video game)",
+  "Kane & Lynch: Dead Men",
+  "Kane & Lynch 2: Dog Days",
+  "The Chronicles of Riddick: Escape from Butcher Bay",
+  "The Chronicles of Riddick: Assault on Dark Athena",
+  "Onimusha: Warlords",
+  "Onimusha 2: Samurai's Destiny",
+  "Okami",
+  "Viewtiful Joe",
+  "Ōkami HD",
+  "Ōkami (2006)",
+  "Bionic Commando Rearmed",
+  "Ikaruga",
+  "Gradius V",
+  "R-Type Final",
+  "Twisted Metal: Black",
+  "Vigilante 8",
+  "Chakan: The Forever Man",
+  "Comix Zone",
+  "Earthworm Jim",
+  "Aladdin (1993 video game)",
+  "The Lion King (1994 video game)",
+  "Mickey Mania: The Timeless Adventures of Mickey Mouse",
+  "Teenage Mutant Ninja Turtles: The Hyperstone Heist",
+  "Teenage Mutant Ninja Turtles: Shredder's Revenge",
+  "Cadillacs and Dinosaurs (Arcade)",
+  "The King of Fighters '98",
+  "The King of Fighters 2002",
+  "Samurai Shodown II",
+  "Samurai Shodown V Special",
+  "Fatal Fury: Mark of the Wolves",
+  "Art of Fighting 2",
+  "Killer Instinct (1994)",
+  "Killer Instinct (2013)",
+  "Primal Rage",
+  "Power Stone",
+  "Power Stone 2",
+  "The House of the Dead",
+  "The House of the Dead 2",
+  "Time Crisis",
+  "Time Crisis II",
+  "Virtua Cop 2",
+  "Dino Crisis",
+  "Dino Crisis 2",
+  "Onimusha 3: Demon Siege",
+  "Resident Evil (1996)",
+  "Resident Evil 2 (1998)",
+  "Resident Evil 3: Nemesis",
+  "Resident Evil Code: Veronica",
+  "Resident Evil 4 (2005)",
+  "Resident Evil 5",
+  "Resident Evil 6",
+  "Resident Evil Zero",
+  "Silent Hill (1999)",
+  "Silent Hill 2 (2001)",
+  "Silent Hill 3",
+  "Silent Hill 4: The Room",
+  "Fatal Frame II: Crimson Butterfly",
+  "Fatal Frame III: The Tormented",
+  "Clock Tower 3",
+  "Rule of Rose",
+  "Haunting Ground",
+  "The Suffering",
+  "The Suffering: Ties That Bind",
+  "Condemned: Criminal Origins",
+  "F.E.A.R. (2005)",
+  "F.E.A.R. 2: Project Origin",
+  "Alan Wake (2010)",
+  "Dead Space (2008)",
+  "Dead Space 2",
+  "Dead Space 3",
+  "Darksiders",
+  "Darksiders II",
+  "Darksiders III",
+  "Braid",
+  "Limbo",
+  "Spelunky",
+  "FTL: Faster Than Light",
+  "Papers, Please",
+  "Pony Island",
+  "World of Warcraft: Classic",
+  "RuneScape (Old School)",
+  "MapleStory",
+  "Ragnarok Online",
+  "Silkroad Online",
+  "MU Online",
+  "Lineage II",
+  "Priston Tale",
+  "Flyff (Fly for Fun)",
+  "Tibia",
+  "AdventureQuest Worlds",
+  "Club Penguin (legacy / fan community)",
+  "Habbo",
+  "Second Life"
+]);
+
+const categoryRules: Array<[string, RegExp]> = [
+  ["MOBA & Card", /league of legends|dota 2|teamfight tactics|legends of runeterra|wild rift|smite|paladins|honor of kings|arena of valor|pokemon unite|mobile legends|brawl stars|hearthstone|magic: the gathering arena|marvel snap|yu-gi-oh|gwent|shadowverse/i],
+  ["FPS & Tactical", /valorant|counter-strike|call of duty|rainbow six|overwatch|battlefield|halo infinite|destiny 2|warframe|the finals|escape from tarkov|delta force|war thunder|world of tanks|battlebit|insurgency|ready or not|squad|hell let loose|arma 3|team fortress|quake|doom|titanfall|crossfire|point blank|combat master|warface|standoff 2|critical ops|blood strike/i],
+  ["Battle Royale", /fortnite|pubg|bgmi|apex legends|free fire|naraka: bladepoint|fall guys|arena breakout|palworld|super animal royale/i],
+  ["Sports & Racing", /ea sports|efootball|nba 2k|madden nfl|wwe 2k|nhl 2|mlb the show|pga tour|f1 |f1$|forza|gran turismo|need for speed|the crew|motogp|wrc|assetto corsa|iracing|snowrunner|dirt rally|trackmania|rocket league|football manager|out of the park baseball|farming simulator|mario kart|hot wheels/i],
+  ["RPG & MMO", /genshin|honkai|zenless|wuthering waves|tower of fantasy|black desert|final fantasy|world of warcraft|elder scrolls online|guild wars|lost ark|new world|path of exile|diablo|elden ring|dark souls|monster hunter|baldur|witcher|cyberpunk|red dead redemption|grand theft auto|persona|like a dragon|yakuza|metaphor|octopath|kingdom come|dragon age|mass effect|divinity|pillars of eternity|pathfinder|nier|fallout|skyrim|star citizen|throne and liberty|black myth|lies of p|sekiro|dragon.s dogma|solo leveling|ragnarok|archeage|palworld/i],
+  ["Sandbox & Survival", /minecraft|roblox|terraria|stardew valley|sims|palworld|ark:|rust|dayz|valheim|don.t starve|project zomboid|7 days to die|the forest|sons of the forest|no man.s sky|grounded|subnautica|dying light|the division|once human|core keeper|enshrouded|v rising|the long dark|green hell|raft|astroneer|lifeafter|undawn|conan exiles|the isle/i],
+  ["Horror & Co-op", /among us|lethal company|phasmophobia|content warning|five nights|dead by daylight|identity v|left 4 dead|back 4 blood|helldivers|deep rock galactic|payday|sea of thieves|resident evil|silent hill|alan wake|outlast|little nightmares|dead island|world war z|until dawn|the quarry|dark pictures|remnant|backrooms/i],
+  ["Fighting & Party", /tekken|street fighter|mortal kombat|guilty gear|super smash|brawlhalla|multiversus|fighting ex layer|dragon ball: sparking|dragon ball fighterz|king of fighters|granblue fantasy versus|rivals of aether|nickelodeon all-star|overcooked|human: fall flat|golf with your friends|ultimate chicken horse|jackbox|party animals|it takes two|unrailed|fall guys/i],
+  ["Strategy & Simulation", /age of empires|civilization|starcraft|warcraft|company of heroes|total war|binding of isaac|slay the spire|balatro|cookie clicker|idle champions|legends of idleon|clash of clans|clash royale|pokemon tcg|plants vs|bloons|mini metro|mini motorways|planet zoo|planet coaster|two point|cities: skylines|factorio|satisfactory|oxygen not included|rimworld|kerbal|euro truck|american truck|house flipper|powerwash|out of the park|football manager|farming simulator|the sims|rollercoaster tycoon/i],
+  ["Mobile & Casual", /bgmi|pubg mobile|free fire|clash of clans|clash royale|brawl stars|mobile legends|honor of kings|pokemon go|pokemon tcg pocket|pokemon masters|pokemon sleep|pokemon cafe|marvel strike force|raid: shadow legends|summoners war|afk arena|afk journey|arknights|blue archive|nikke|reverse: 1999|black clover m|mech arena|cookie clicker|super auto pets|geometry dash|osu!|chess.com|lichess|peg gle|peggle|tetris|puyo puyo|plants vs|bloons/i],
+  ["Indie & Adventure", /hades|hollow knight|celeste|cuphead|dead cells|vampire survivors|undertale|deltarune|stardew valley|tunic|fez|firewatch|edith finch|short hike|spiritfarer|gris|inside|limbo|stanley parable|portal|talos principle|the witness|baba is you|world of goo|outer wilds|dave the diver|dredge|brotato|ori and|sea of stars|control|death stranding|journey|abzu|braids/i],
+];
+
+function categoryFor(game: string) {
+  if (classicGames.has(game)) return "Classic & Retro";
+  for (const [category, pattern] of categoryRules) {
+    if (pattern.test(game)) return category;
+  }
+  return "Other Games";
+}
+const searchAliases: Record<string, string[]> = {
+  "Cadillacs and Dinosaurs": ["Mustafa", "Mustapha", "Mustapha arcade", "Mustafa arcade"],
+  "Project IGI: I'm Going In": ["IGI", "Project IGI", "I'm Going In"],
+  "Marvel's Spider-Man (2000)": ["Spiderman", "Spider Man", "Spider-Man 2000"],
+  "Spider-Man 2 (2004 video game)": ["Spiderman 2", "Spider Man 2", "Spider-Man 2 2004"],
+  "Max Payne": ["Maxpayne", "Max Payne 1"],
+  "Fable (2004)": ["Fable 1", "Original Fable"],
+};
+
+// GAMERRP_LIVE_SEARCH_SUGGESTIONS_V1
+function normalizeGameSearch(value: string) {
+  return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+}
+
+function matchesGameSearch(title: string, query: string, aliases: string[] = []) {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return true;
+  if (title.toLowerCase().includes(needle)) return true;
+  const normalizedNeedle = normalizeGameSearch(needle);
+  if (normalizedNeedle && normalizeGameSearch(title).includes(normalizedNeedle)) return true;
+  return aliases.some((alias) => alias.toLowerCase().includes(needle) || normalizeGameSearch(alias).includes(normalizedNeedle));
+}
+
+const categories = ["All games", ...Array.from(new Set(releasedGames.map(categoryFor))).sort()];
+
+function loginTo(path: string) {
+  window.location.href = `/login?next=${encodeURIComponent(path)}`;
+}
+
+export default function GamesPage() {
   const [search, setSearch] = useState("");
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+  const [category, setCategory] = useState("All games");
+  const [view, setView] = useState<"released" | "upcoming">("released");
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
+  const [userId, setUserId] = useState("");
+  const [customGame, setCustomGame] = useState("");
+  const [message, setMessage] = useState("");
+  const [savingGame, setSavingGame] = useState("");
 
   useEffect(() => {
     let active = true;
-
-    async function loadGames() {
+    async function loadProfileGames() {
       const { data: authData, error: authError } = await supabase.auth.getUser();
-
       if (!active) return;
-
       if (authError || !authData.user) {
-        window.location.replace("/login");
-        return;
+        setUserId("");
+        return; // Browse the catalog without signing in.
       }
-
+      setUserId(authData.user.id);
       const { data, error } = await supabase
         .from("gamer_profiles")
         .select("selected_games")
         .eq("user_id", authData.user.id)
         .maybeSingle();
-
       if (!active) return;
-
-      if (error) {
-        console.error("Games load failed:", error.message);
-        alert("Could not load your games. Please refresh and try again.");
-        return;
-      }
-
-      setSelectedGames(
-        data && Array.isArray(data.selected_games) ? data.selected_games : []
-      );
+      if (error) setMessage(`Could not load saved games: ${error.message}`);
+      else setSelectedGames(data && Array.isArray(data.selected_games) ? data.selected_games : []);
     }
-
-    void loadGames();
-
-    return () => {
-      active = false;
-    };
+    void loadProfileGames();
+    return () => { active = false; };
   }, []);
 
-  async function toggleGame(game: string) {
+  async function saveGames(nextGames: string[]) {
+    setMessage("");
     const { data: authData, error: authError } = await supabase.auth.getUser();
-
     if (authError || !authData.user) {
-      window.location.replace("/login");
-      return;
+      loginTo("/games");
+      return false;
     }
-
-    const updatedGames = selectedGames.includes(game)
-      ? selectedGames.filter((item) => item !== game)
-      : [...selectedGames, game];
-
-    const { error } = await supabase
-      .from("gamer_profiles")
-      .upsert(
-        {
-          user_id: authData.user.id,
-          selected_games: updatedGames,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" }
-      );
-
+    setSavingGame("saving");
+    const { error } = await supabase.from("gamer_profiles").upsert({
+      user_id: authData.user.id,
+      selected_games: nextGames,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
+    setSavingGame("");
     if (error) {
-      console.error("Games save failed:", error.message);
-      alert("Games could not be saved: " + error.message);
-      return;
+      setMessage(`Games could not be saved: ${error.message}`);
+      return false;
     }
-
-    setSelectedGames(updatedGames);
+    setUserId(authData.user.id);
+    setSelectedGames(nextGames);
+    return true;
   }
 
-  const filteredGames = games.filter((game) =>
-    game.toLowerCase().includes(search.toLowerCase())
-  );
+  async function toggleGame(game: string) {
+    const isAdded = selectedGames.some((entry) => entry.toLowerCase() === game.toLowerCase());
+    const nextGames = isAdded
+      ? selectedGames.filter((entry) => entry.toLowerCase() !== game.toLowerCase())
+      : [...selectedGames, game];
+    const ok = await saveGames(nextGames);
+    if (ok) setMessage(isAdded ? `${game} removed from your profile.` : `${game} added to your profile.`);
+  }
+
+  async function addCustomGame(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const name = customGame.trim();
+    if (!name) return;
+    if (name.length > 80) { setMessage("Game names must be 80 characters or fewer."); return; }
+    if (selectedGames.some((entry) => entry.toLowerCase() === name.toLowerCase())) {
+      setMessage("That game is already in your profile."); return;
+    }
+    const ok = await saveGames([...selectedGames, name]);
+    if (ok) { setCustomGame(""); setMessage(`${name} added to your profile.`); }
+  }
+
+  const filteredGames = useMemo(() => releasedGames.filter((game) => {
+    const query = search.trim().toLowerCase();
+    const aliases = searchAliases[game] || [];
+    const matchesSearch = matchesGameSearch(game, query, aliases);
+    const matchesCategory = category === "All games" || categoryFor(game) === category;
+    return matchesSearch && matchesCategory;
+  }), [search, category]);
+
+  const filteredUpcoming = useMemo(() => upcomingGames.filter((game) =>
+    `${game.name} ${game.date} ${game.platforms}`.toLowerCase().includes(search.trim().toLowerCase())
+  ), [search]);
+
+  const searchSuggestions = useMemo(() => {
+    const query = search.trim();
+    if (!query) return [] as Array<{ title: string; meta: string }>;
+
+    if (view === "upcoming") {
+      return upcomingGames
+        .filter((game) => matchesGameSearch(game.name, query) || `${game.date} ${game.platforms}`.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 8)
+        .map((game) => ({ title: game.name, meta: `Upcoming · ${game.date}` }));
+    }
+
+    const normalizedQuery = normalizeGameSearch(query);
+    return releasedGames
+      .filter((game) => {
+        const matchesCategory = category === "All games" || categoryFor(game) === category;
+        return matchesCategory && matchesGameSearch(game, query, searchAliases[game] || []);
+      })
+      .sort((a, b) => {
+        const score = (title: string) => {
+          const normalizedTitle = normalizeGameSearch(title);
+          const aliases = searchAliases[title] || [];
+          if (normalizedTitle === normalizedQuery || aliases.some((alias) => normalizeGameSearch(alias) === normalizedQuery)) return 0;
+          if (normalizedTitle.startsWith(normalizedQuery) || aliases.some((alias) => normalizeGameSearch(alias).startsWith(normalizedQuery))) return 1;
+          return 2;
+        };
+        return score(a) - score(b) || a.localeCompare(b);
+      })
+      .slice(0, 8)
+      .map((title) => ({ title, meta: categoryFor(title) }));
+  }, [search, view, category]);
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <div className="mx-auto max-w-5xl">
-
-        <div className="mb-10">
-          <p className="text-sm font-medium text-cyan-400">
-            GamerRP
-          </p>
-
-          <h1 className="mt-2 text-4xl font-bold">
-            What games do you play?
-          </h1>
-
-          <p className="mt-3 text-slate-400">
-            Select the games you have experience with.
-          </p>
-        </div>
-
-        <div className="mb-8">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search games..."
-            className="w-full rounded-xl border border-white/10 bg-slate-900 px-5 py-4 outline-none placeholder:text-slate-500 focus:border-cyan-400"
-          />
-        </div>
-
-        {selectedGames.length > 0 && (
-          <div className="mb-8 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-6">
-            <p className="text-sm text-cyan-400">
-              Your Games
-            </p>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {selectedGames.map((game) => (
-                <span
-                  key={game}
-                  className="rounded-full bg-cyan-400/10 px-4 py-2 text-sm text-cyan-300"
-                >
-                  🎮 {game}
-                </span>
-              ))}
-            </div>
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
+      <div className="mx-auto max-w-7xl">
+        <section className="mb-8 rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/10 to-slate-900 p-7 sm:p-10">
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-300">GamerRP Game Directory</p>
+          <h1 className="mt-3 text-3xl font-black sm:text-5xl">Find your game. Build your gamer profile.</h1>
+          <p className="mt-4 max-w-3xl leading-7 text-slate-300">Browse a large curated catalog, search by title, filter by genre, or add a game that is missing. Browsing is free; sign in only when you want to save games to your profile.</p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" onClick={() => setView("released")} className={`rounded-xl px-4 py-3 font-semibold ${view === "released" ? "bg-cyan-400 text-slate-950" : "border border-white/15 text-white hover:bg-white/5"}`}>Released games ({releasedGames.length})</button>
+            <button type="button" onClick={() => setView("upcoming")} className={`rounded-xl px-4 py-3 font-semibold ${view === "upcoming" ? "bg-cyan-400 text-slate-950" : "border border-white/15 text-white hover:bg-white/5"}`}>Upcoming & announced ({upcomingGames.length})</button>
           </div>
-        )}
+        </section>
 
-        {filteredGames.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-10 text-center">
-            <p className="text-lg font-semibold">
-              No games found
-            </p>
-
-            <p className="mt-2 text-slate-500">
-              Try searching for another game.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredGames.map((game) => {
-
-              if (game === "Valorant") {
-                return (
-                  <Link
-                    key={game}
-                    href="/games/valorant"
-                    className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left transition hover:border-cyan-400/50 hover:bg-cyan-400/5"
+        <div className="mb-6 grid gap-3 md:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="relative">
+            <input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setSuggestionsOpen(true); setActiveSuggestionIndex(0); }}
+              onFocus={() => { if (search.trim()) setSuggestionsOpen(true); }}
+              onBlur={() => setSuggestionsOpen(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") { setSuggestionsOpen(false); return; }
+                if ((e.key === "ArrowDown" || e.key === "ArrowUp") && searchSuggestions.length > 0) {
+                  e.preventDefault();
+                  setSuggestionsOpen(true);
+                  const direction = e.key === "ArrowDown" ? 1 : -1;
+                  setActiveSuggestionIndex((current) => Math.max(0, Math.min(searchSuggestions.length - 1, current + direction)));
+                  return;
+                }
+                if (e.key === "Enter" && suggestionsOpen && searchSuggestions.length > 0) {
+                  e.preventDefault();
+                  const chosen = searchSuggestions[activeSuggestionIndex] || searchSuggestions[0];
+                  setSearch(chosen.title);
+                  setSuggestionsOpen(false);
+                }
+              }}
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={suggestionsOpen && search.trim().length > 0}
+              aria-controls="gamerrp-game-suggestions"
+              placeholder={view === "upcoming" ? "Search upcoming titles..." : `Search ${releasedGames.length}+ released game titles...`}
+              className="w-full rounded-xl border border-white/10 bg-slate-900 px-5 py-4 outline-none focus:border-cyan-400"
+            />
+            {suggestionsOpen && search.trim().length > 0 && (
+              <div id="gamerrp-game-suggestions" role="listbox" className="absolute left-0 right-0 top-full z-40 mt-2 max-h-80 overflow-y-auto rounded-xl border border-cyan-400/25 bg-slate-950 p-2 shadow-2xl shadow-black/40">
+                {searchSuggestions.length > 0 ? searchSuggestions.map((suggestion, index) => (
+                  <button
+                    key={suggestion.title}
+                    type="button"
+                    role="option"
+                    aria-selected={index === activeSuggestionIndex}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onMouseEnter={() => setActiveSuggestionIndex(index)}
+                    onClick={() => { setSearch(suggestion.title); setSuggestionsOpen(false); setActiveSuggestionIndex(0); }}
+                    className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-3 text-left transition ${index === activeSuggestionIndex ? "bg-cyan-400/15 text-cyan-100" : "text-slate-200 hover:bg-white/5"}`}
                   >
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-400/10 text-2xl">
-                      🎮
-                    </div>
-
-                    <h2 className="font-semibold">
-                      {game}
-                    </h2>
-
-                    <p className="mt-1 text-sm text-slate-500">
-                      Add your experience
-                    </p>
-                  </Link>
-                );
-              }
-
-              const added = selectedGames.includes(game);
-
-              return (
-                <button
-                  key={game}
-                  type="button"
-                  onClick={() => toggleGame(game)}
-                  className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-left transition hover:border-cyan-400/50 hover:bg-cyan-400/5"
-                >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-400/10 text-2xl">
-                    🎮
-                  </div>
-
-                  <h2 className="font-semibold">
-                    {game}
-                  </h2>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    {added ? "✓ Added to your games" : "Add to your games"}
-                  </p>
-                </button>
-              );
-            })}
+                    <span className="flex min-w-0 items-center gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-400/10">🎮</span><span className="truncate font-medium">{suggestion.title}</span></span>
+                    <span className="shrink-0 text-xs text-slate-500">{suggestion.meta}</span>
+                  </button>
+                )) : (
+                  <p className="px-3 py-4 text-sm text-slate-400">No matching game yet. Try another spelling or add it as a custom game below.</p>
+                )}
+                {searchSuggestions.length > 0 && <p className="px-3 pb-2 pt-3 text-xs text-slate-500">Showing up to 8 matches · Use ↑ ↓ and Enter</p>}
+              </div>
+            )}
           </div>
-        )}
+          {view === "released" ? (
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white">
+              {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          ) : <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">Release dates may change</div>}
+        </div>
 
+        {message && <p role="status" className="mb-5 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-4 text-sm text-cyan-200">{message}</p>}
+
+        {view === "released" ? (
+          <>
+            {userId && selectedGames.length > 0 && <section className="mb-8 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-xl font-bold">Your games <span className="text-sm font-normal text-slate-400">({selectedGames.length})</span></h2><Link href="/profile" className="text-sm text-cyan-300 hover:text-cyan-200">View profile →</Link></div>
+              <div className="mt-4 flex flex-wrap gap-2">{selectedGames.map((game) => <button key={game} type="button" onClick={() => void toggleGame(game)} title="Remove this game" className="rounded-full border border-cyan-400/25 bg-slate-950/60 px-3 py-2 text-sm text-cyan-200 hover:border-rose-400/50">🎮 {game} <span className="ml-1 text-slate-400">×</span></button>)}</div>
+            </section>}
+
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-bold">{category === "All games" ? "Browse the catalog" : category}</h2><p className="text-sm text-slate-500">{filteredGames.length} titles listed</p></div>
+            {filteredGames.length === 0 ? <div className="rounded-2xl border border-white/10 p-8 text-center"><p className="font-bold">No matching title in the catalog</p><p className="mt-2 text-sm text-slate-400">Try another search or add the missing game below.</p></div> : <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredGames.map((game) => {
+                const added = selectedGames.some((entry) => entry.toLowerCase() === game.toLowerCase());
+                return <article key={game} className="flex min-h-44 flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-400/40">
+                  <div className="flex items-start justify-between gap-2"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-xl">🎮</span><span className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-slate-400">{categoryFor(game)}</span></div>
+                  <h3 className="mt-4 flex-1 font-semibold leading-5">{game}</h3>
+                  {game === "Valorant" && <Link href={userId ? "/games/valorant" : "/login?next=%2Fgames%2Fvalorant"} className="mt-3 text-xs text-slate-400 hover:text-cyan-300">Rank & experience details →</Link>}
+                  <button type="button" disabled={savingGame !== ""} onClick={() => void toggleGame(game)} className={`mt-4 rounded-lg px-3 py-2 text-sm font-semibold disabled:opacity-50 ${added ? "border border-cyan-400/30 text-cyan-200 hover:border-rose-400/40" : "bg-cyan-400 text-slate-950 hover:bg-cyan-300"}`}>{savingGame !== "" ? "Saving…" : added ? "✓ Added · Remove" : "Add to my games"}</button>
+                </article>;
+              })}
+            </div>}
+
+            <section className="mt-10 rounded-2xl border border-white/10 bg-slate-900/70 p-6">
+              <h2 className="text-xl font-bold">Game missing from our list?</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">GamerRP's catalog is curated and cannot contain every regional, indie, legacy or newly released title. Add the exact title to your own profile so it is not blocked by the catalog.</p>
+              {userId ? <form onSubmit={addCustomGame} className="mt-4 flex flex-col gap-3 sm:flex-row"><input value={customGame} onChange={(e) => setCustomGame(e.target.value)} maxLength={80} placeholder="Enter game title (max 80 characters)" className="min-w-0 flex-1 rounded-xl border border-white/10 bg-slate-950 px-4 py-3 outline-none focus:border-cyan-400"/><button type="submit" disabled={!customGame.trim() || savingGame !== ""} className="rounded-xl bg-cyan-400 px-5 py-3 font-bold text-slate-950 disabled:opacity-50">Add custom game</button></form> : <div className="mt-4 flex flex-wrap items-center gap-3"><Link href="/login?next=%2Fgames" className="rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950">Log in to add a game</Link><span className="text-sm text-slate-500">Already have an account? Log in—no need to register again.</span></div>}
+            </section>
+          </>
+        ) : (
+          <>
+            <p className="mb-4 text-sm text-slate-400">These are announced titles listed as upcoming as of October 24, 2026. Release dates and platforms can change. Upcoming titles cannot be added to “games played” until they are released.</p>
+            {filteredUpcoming.length === 0 ? <div className="rounded-2xl border border-white/10 p-8 text-center">No upcoming titles matched that search.</div> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{filteredUpcoming.map((game) => <article key={game.name} className="rounded-2xl border border-amber-300/20 bg-amber-300/[0.04] p-5"><div className="flex items-center justify-between gap-2"><span className="rounded-full border border-amber-300/25 px-3 py-1 text-xs text-amber-200">Upcoming</span><span className="text-xs text-slate-500">Not playable yet</span></div><h3 className="mt-4 text-lg font-bold">{game.name}</h3><p className="mt-2 text-sm text-amber-200">Planned: {game.date}</p><p className="mt-2 text-xs leading-5 text-slate-400">Platforms: {game.platforms}</p></article>)}</div>}
+          </>
+        )}
       </div>
     </main>
   );

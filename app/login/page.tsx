@@ -1,23 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+
+function safePath(path: string | null, fallback: string) {
+  if (!path || !path.startsWith("/") || path.startsWith("//") || path.includes("\\")) return fallback;
+  if (path === "/login" || path === "/signup") return fallback;
+  return path;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [nextPath, setNextPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    setNextPath(new URLSearchParams(window.location.search).get("next"));
+  }, []);
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setLoading(false);
     if (error) return setMessage(error.message);
-    window.location.href = "/feed";
+
+    const safeNext = safePath(nextPath, "/feed");
+    window.location.replace(safeNext);
   }
 
   return (
@@ -25,7 +38,7 @@ export default function LoginPage() {
       <form onSubmit={handleLogin} className="w-full max-w-md space-y-5 rounded-2xl border border-white/10 bg-slate-900 p-8">
         <Link href="/" className="text-2xl font-bold">Gamer<span className="text-cyan-400">RP</span></Link>
         <h1 className="text-3xl font-bold">Welcome back</h1>
-        <p className="text-slate-400">Log in to your gaming identity.</p>
+        <p className="text-slate-400">Log in to your existing GamerRP account.</p>
         <label className="block text-sm">Email
           <input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-2 w-full rounded-lg border border-white/15 bg-slate-950 p-3" />
         </label>
@@ -33,8 +46,9 @@ export default function LoginPage() {
           <input required type="password" autoComplete="current-password" value={password} onChange={e => setPassword(e.target.value)} className="mt-2 w-full rounded-lg border border-white/15 bg-slate-950 p-3" />
         </label>
         {message && <p role="alert" className="text-sm text-rose-400">{message}</p>}
-        <button disabled={loading} className="w-full rounded-lg bg-cyan-400 p-3 font-semibold text-slate-950 disabled:opacity-60">{loading ? "Logging in..." : "Log in"}</button>
-        <p className="text-sm text-slate-400">New to GamerRP? <Link href="/signup" className="text-cyan-400">Create an account</Link></p>
+        <button disabled={loading} className="w-full rounded-lg bg-cyan-400 p-3 font-semibold text-slate-950 disabled:opacity-60">{loading ? "Logging in…" : "Log in"}</button>
+        <p className="text-sm text-slate-400">New to GamerRP? <Link href={`/signup${nextPath ? `?next=${encodeURIComponent(nextPath)}` : ""}`} className="text-cyan-400">Create an account</Link></p>
+        <Link href="/pricing" className="block text-center text-sm text-cyan-300">View Free and Pro plans</Link>
       </form>
     </main>
   );
