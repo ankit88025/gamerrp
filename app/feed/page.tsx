@@ -163,6 +163,7 @@ export default function FeedPage() {
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-500">Your network</p>
             <SideLink href="/profile" label="My gamer profile" icon="👤" />
             <SideLink href="/discover" label="Discover gamers" icon="🌎" />
+            <SideLink href="/notifications" label="Notifications" icon="🔔" />
             <SideLink href="/games" label="Games directory" icon="🎮" />
             <SideLink href="/opportunities" label="Opportunities" icon="🏆" />
           </aside>
@@ -260,6 +261,7 @@ function Header() {
     <nav className="flex flex-wrap gap-2 text-sm">
       <Link className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5" href="/feed">Feed</Link>
       <Link className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5" href="/discover">Discover</Link>
+      <Link className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5" href="/notifications">Notifications</Link>
       <Link className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5" href="/opportunities">Opportunities</Link>
     </nav>
   </header>;
