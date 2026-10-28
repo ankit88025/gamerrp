@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 type GamerProfile = { user_id: string; gamer_name: string | null; avatar_style?: string | null };
 type Comment = { id: string; post_id: string; user_id: string; body: string; created_at: string; gamer_name?: string };
 type Post = {
-  id: string; user_id: string; body: string; created_at: string;
+  id: string; user_id: string; body: string; image_url?: string | null; created_at: string;
   gamer_name: string; avatar_style?: string | null; likes: number; liked: boolean;
   comments: Comment[];
 };
@@ -18,6 +18,8 @@ const field = "w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 t
 export default function FeedPage() {
   const [userId, setUserId] = useState("");
   const [draft, setDraft] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
   const [posts, setPosts] = useState<Post[]>([]);
   const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -35,7 +37,7 @@ export default function FeedPage() {
     setUserId(currentUserId);
 
     const { data: postRows, error } = await supabase
-      .from("gamer_posts").select("id,user_id,body,created_at")
+      .from("gamer_posts").select("id,user_id,body,image_url,created_at")
       .order("created_at", { ascending: false }).limit(50);
     if (error) {
       setMessage(`Feed setup needed: ${error.message}. Run SUPABASE_SETUP.sql from the project package.`);
@@ -80,13 +82,58 @@ export default function FeedPage() {
 
   async function createPost(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!draft.trim() || !userId) return;
+    if ((!draft.trim() && !selectedImage) || !userId) return;
     setBusy(true); setMessage("");
-    const { error } = await supabase.from("gamer_posts").insert({ user_id: userId, body: draft.trim() });
+
+    let imageUrl: string | null = null;
+    if (selectedImage) {
+      const extension = selectedImage.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExtension = /^[a-z0-9]+$/.test(extension) ? extension : "jpg";
+      const path = `${userId}/${crypto.randomUUID()}.${safeExtension}`;
+      const { error: uploadError } = await supabase.storage
+        .from("gamer-post-images")
+        .upload(path, selectedImage, { cacheControl: "3600", upsert: false, contentType: selectedImage.type });
+      if (uploadError) {
+        setBusy(false);
+        setMessage(`Image upload failed: ${uploadError.message}. Check the GamerRP image storage setup.`);
+        return;
+      }
+      imageUrl = supabase.storage.from("gamer-post-images").getPublicUrl(path).data.publicUrl;
+    }
+
+    const { error } = await supabase.from("gamer_posts").insert({
+      user_id: userId,
+      body: draft.trim(),
+      image_url: imageUrl,
+    });
     setBusy(false);
     if (error) { setMessage(error.message); return; }
     setDraft("");
+    setSelectedImage(null);
+    setImagePreview("");
     await loadFeed();
+  }
+
+  async function deletePost(post: Post) {
+    if (!userId || post.user_id !== userId || busy) return;
+    if (!window.confirm("Delete this post permanently?")) return;
+
+    setBusy(true);
+    setMessage("");
+    const { error } = await supabase
+      .from("gamer_posts")
+      .delete()
+      .eq("id", post.id)
+      .eq("user_id", userId);
+    setBusy(false);
+
+    if (error) {
+      setMessage(`Could not delete post: ${error.message}`);
+      return;
+    }
+
+    setPosts((current) => current.filter((item) => item.id !== post.id));
+    setMessage("Your post was deleted.");
   }
 
   async function toggleLike(post: Post) {
@@ -123,9 +170,36 @@ export default function FeedPage() {
             <form onSubmit={createPost} className={`${panel} p-5`}>
               <p className="mb-3 font-semibold">Share your gaming journey</p>
               <textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={2000} rows={3} placeholder="Share a tournament result, a gaming milestone, a team win, or what you're learning..." className={field} />
-              <div className="mt-3 flex items-center justify-between gap-3">
+              {imagePreview && (
+                <div className="relative mt-3 inline-block max-w-full">
+                  <img src={imagePreview} alt="Selected post preview" className="max-h-72 max-w-full rounded-xl border border-white/10 object-contain" />
+                  <button type="button" onClick={() => { setSelectedImage(null); setImagePreview(""); }} className="mt-2 rounded-lg border border-rose-400/30 px-3 py-1.5 text-sm text-rose-300">Remove image</button>
+                </div>
+              )}
+              <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="cursor-pointer rounded-xl border border-white/15 px-4 py-2.5 text-sm font-semibold text-cyan-300 hover:border-cyan-400">
+                    📷 Add photo
+                    <input
+                      key={imagePreview || "no-image"}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.currentTarget.files?.[0];
+                        if (!file) return;
+                        if (!file.type.startsWith("image/")) { setMessage("Please choose an image file."); return; }
+                        if (file.size > 5 * 1024 * 1024) { setMessage("Image must be 5 MB or smaller."); return; }
+                        setMessage("");
+                        setSelectedImage(file);
+                        setImagePreview(URL.createObjectURL(file));
+                      }}
+                    />
+                  </label>
+                  <span className="text-xs text-slate-500">JPG, PNG, GIF or WebP · max 5 MB</span>
+                </div>
                 <span className="text-xs text-slate-500">{draft.length}/2000 characters</span>
-                <button disabled={busy || !draft.trim()} className="rounded-xl bg-cyan-400 px-5 py-2.5 font-bold text-slate-950 disabled:opacity-50">{busy ? "Posting..." : "Publish post"}</button>
+                <button disabled={busy || (!draft.trim() && !selectedImage)} className="rounded-xl bg-cyan-400 px-5 py-2.5 font-bold text-slate-950 disabled:opacity-50">{busy ? "Posting..." : "Publish post"}</button>
               </div>
               {message && <p role="alert" className="mt-3 text-sm text-amber-300">{message}</p>}
             </form>
@@ -143,10 +217,23 @@ export default function FeedPage() {
                     <p className="font-semibold">{post.gamer_name}</p>
                     <p className="text-xs text-slate-500">{new Date(post.created_at).toLocaleString()}</p>
                   </div>
-                  <Link href="/discover" className="text-xs text-cyan-300 hover:text-cyan-200">Find gamers</Link>
+                  <div className="flex items-center gap-3">
+                    <Link href="/discover" className="text-xs text-cyan-300 hover:text-cyan-200">Find gamers</Link>
+                    {post.user_id === userId && (
+                      <button
+                        type="button"
+                        onClick={() => void deletePost(post)}
+                        disabled={busy}
+                        className="text-xs text-rose-300 hover:text-rose-200 disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="my-5 whitespace-pre-wrap break-words leading-7 text-slate-200">{post.body}</p>
-                <div className="flex items-center gap-4 border-y border-white/10 py-3 text-sm">
+                {post.body && <p className="my-5 whitespace-pre-wrap break-words leading-7 text-slate-200">{post.body}</p>}
+                {post.image_url && <img src={post.image_url} alt={`Photo shared by ${post.gamer_name}`} loading="lazy" className="mt-4 max-h-[560px] w-full rounded-xl border border-white/10 object-contain" />}
+                <div className="mt-4 flex items-center gap-4 border-y border-white/10 py-3 text-sm">
                   <button onClick={() => void toggleLike(post)} className={post.liked ? "font-semibold text-cyan-300" : "text-slate-300 hover:text-cyan-300"}>{post.liked ? "♥ Liked" : "♡ Like"} · {post.likes}</button>
                   <span className="text-slate-500">💬 {post.comments.length} comments</span>
                 </div>
