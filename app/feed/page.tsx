@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import GamingDiscovery from "@/app/feed/components/gaming-discovery";
 
 type GamerProfile = { user_id: string; gamer_name: string | null; avatar_style?: string | null };
 type Comment = { id: string; post_id: string; user_id: string; body: string; created_at: string; gamer_name?: string };
@@ -196,6 +197,8 @@ export default function FeedPage() {
             <SideLink href="/opportunities" label="Opportunities" icon="🏆" />
           </aside>
           <section className="space-y-5">
+            <GamingDiscovery />
+
             <form onSubmit={createPost} className={`${panel} p-5`}>
               <p className="mb-3 font-semibold">Share your gaming journey</p>
               <textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={2000} rows={3} placeholder="Share a tournament result, a gaming milestone, a team win, or what you're learning..." className={field} />
