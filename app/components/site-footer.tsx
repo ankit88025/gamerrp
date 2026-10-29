@@ -8,8 +8,6 @@ export default function SiteFooter() {
           <Link href="/" className="text-lg font-bold text-white">Gamer<span className="text-cyan-400">RP</span></Link>
           <p className="mt-2 max-w-md">A professional network for gamers. Build your gaming identity, showcase achievements and discover opportunities.</p>
           <p className="mt-2">© {new Date().getFullYear()} GamerRP. All rights reserved.</p>
-          <p className="mt-1">Founder: Ankit Kumar</p>
-          <a className="mt-1 inline-block text-cyan-300 hover:text-cyan-200" href="mailto:ankit88025@gmail.com">ankit88025@gmail.com</a>
         </div>
         <nav aria-label="Legal and company links" className="flex flex-wrap gap-x-4 gap-y-2">
           <Link className="hover:text-white" href="/terms">Terms & Conditions</Link>
