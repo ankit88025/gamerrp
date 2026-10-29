@@ -154,6 +154,34 @@ export default function FeedPage() {
     await loadFeed();
   }
 
+  async function deleteComment(postId: string, comment: Comment) {
+    if (!userId || comment.user_id !== userId || busy) return;
+    if (!window.confirm("Delete your comment permanently?")) return;
+
+    setBusy(true);
+    setMessage("");
+
+    const { error } = await supabase
+      .from("gamer_post_comments")
+      .delete()
+      .eq("id", comment.id)
+      .eq("user_id", userId);
+
+    setBusy(false);
+
+    if (error) {
+      setMessage(`Could not delete comment: ${error.message}`);
+      return;
+    }
+
+    setPosts((current) => current.map((post) =>
+      post.id === postId
+        ? { ...post, comments: post.comments.filter((item) => item.id !== comment.id) }
+        : post
+    ));
+    setMessage("Your comment was deleted.");
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 text-white sm:px-6">
       <div className="mx-auto max-w-5xl">
@@ -239,7 +267,24 @@ export default function FeedPage() {
                   <span className="text-slate-500">💬 {post.comments.length} comments</span>
                 </div>
                 <div className="mt-3 space-y-3">
-                  {post.comments.map((comment) => <div key={comment.id} className="rounded-xl bg-slate-950/70 px-3 py-2"><p className="text-xs font-semibold text-cyan-300">{comment.gamer_name}</p><p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">{comment.body}</p></div>)}
+                  {post.comments.map((comment) => (
+                    <div key={comment.id} className="rounded-xl bg-slate-950/70 px-3 py-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-xs font-semibold text-cyan-300">{comment.gamer_name}</p>
+                        {comment.user_id === userId && (
+                          <button
+                            type="button"
+                            onClick={() => void deleteComment(post.id, comment)}
+                            disabled={busy}
+                            className="text-xs text-rose-300 hover:text-rose-200 disabled:opacity-50"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                      <p className="mt-1 whitespace-pre-wrap text-sm text-slate-300">{comment.body}</p>
+                    </div>
+                  ))}
                   <div className="flex gap-2">
                     <input value={commentDrafts[post.id] || ""} onChange={(e) => setCommentDrafts((current) => ({ ...current, [post.id]: e.target.value }))} maxLength={500} placeholder="Write a comment…" className={`${field} min-w-0`} />
                     <button onClick={() => void addComment(post.id)} disabled={!(commentDrafts[post.id] || "").trim()} className="rounded-xl border border-white/15 px-4 text-sm font-semibold hover:border-cyan-400 disabled:opacity-40">Reply</button>
