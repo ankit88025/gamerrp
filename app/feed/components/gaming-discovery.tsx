@@ -82,7 +82,7 @@ export default function GamingDiscovery() {
       </div>}
 
       {section === "Popular Games" && <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {popular.map((game) => <a key={game.appId} href={`https://store.steampowered.com/app/${game.appId}/`} target="_blank" rel="noreferrer" className="group overflow-hidden rounded-xl border border-white/10 bg-slate-950/70"><img src={cover(game.appId)} alt={`${game.name} cover`} loading="lazy" className="h-24 w-full object-cover transition group-hover:scale-[1.02]"/><div className="p-3"><h3 className="text-sm font-bold group-hover:text-cyan-200">{game.name}</h3><p className="mt-1 text-xs text-slate-500">{game.genre}</p><span className="mt-2 inline-block text-xs text-cyan-300">Explore game ↗</span></div></a>)}
+        {popular.map((game) => <a key={game.appId} href="/games" className="group overflow-hidden rounded-xl border border-white/10 bg-slate-950/70"><img src={cover(game.appId)} alt={`${game.name} cover`} loading="lazy" className="h-24 w-full object-cover transition group-hover:scale-[1.02]"/><div className="p-3"><h3 className="text-sm font-bold group-hover:text-cyan-200">{game.name}</h3><p className="mt-1 text-xs text-slate-500">{game.genre}</p><span className="mt-2 inline-block text-xs text-cyan-300">Explore game ↗</span></div></a>)}
       </div>}
 
       {section === "Upcoming Games" && <div className="mt-4 grid gap-3 sm:grid-cols-2">
