@@ -70,9 +70,9 @@ export default function GamingDiscovery() {
         {loading && updates.length === 0 ? <p className="py-8 text-center text-sm text-slate-400">Loading official game updates…</p> : error && updates.length === 0 ? <p className="py-4 text-sm text-amber-200">{error}</p> : null}
         <div className="grid gap-3 sm:grid-cols-2">
           {updates.map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/70">
-            <a href={item.url} target="_blank" rel="noreferrer" className="group block">
+            <a href="/games" className="group block">
               <img src={item.image} alt={`${item.game} cover`} loading="lazy" className="h-28 w-full object-cover transition group-hover:opacity-90" />
-              <div className="p-3"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold text-cyan-300">{item.game}</span><span className="text-[11px] text-slate-500">{formatDate(item.date)}</span></div><h3 className="mt-2 font-bold leading-snug group-hover:text-cyan-200">{item.title}</h3><p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">{item.summary || "Open the official announcement for details."}</p><span className="mt-3 inline-block text-xs font-semibold text-cyan-300">Read source ↗</span></div>
+              <div className="p-3"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-xs font-bold text-cyan-300">{item.game}</span><span className="text-[11px] text-slate-500">{formatDate(item.date)}</span></div><h3 className="mt-2 font-bold leading-snug group-hover:text-cyan-200">{item.title}</h3><p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">{item.summary || "Open the official announcement for details."}</p><span className="mt-3 inline-block text-xs font-semibold text-cyan-300">Explore in GamerRP →</span></div>
             </a>
           </article>)}
         </div>
@@ -86,12 +86,12 @@ export default function GamingDiscovery() {
       </div>}
 
       {section === "Upcoming Games" && <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {upcoming.map((game) => <article key={game.name} className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/70"><a href={game.source} target="_blank" rel="noreferrer" className="group block"><div className="flex h-32 items-center justify-center bg-gradient-to-br from-cyan-400/20 via-slate-900 to-indigo-500/20 px-5 text-center">
+        {upcoming.map((game) => <article key={game.name} className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/70"><a href="/games" className="group block"><div className="flex h-32 items-center justify-center bg-gradient-to-br from-cyan-400/20 via-slate-900 to-indigo-500/20 px-5 text-center">
   <div>
     <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan-300">GamerRP Upcoming</span>
     <p className="mt-2 text-lg font-black text-white">{game.name}</p>
   </div>
-</div><div className="p-3"><span className="text-xs font-bold text-amber-300">UPCOMING · {game.date}</span><h3 className="mt-1 font-bold group-hover:text-cyan-200">{game.name}</h3><p className="mt-1 text-xs text-slate-400">{game.platforms}</p><span className="mt-3 inline-block text-xs text-cyan-300">Check release source ↗</span></div></a></article>)}
+</div><div className="p-3"><span className="text-xs font-bold text-amber-300">UPCOMING · {game.date}</span><h3 className="mt-1 font-bold group-hover:text-cyan-200">{game.name}</h3><p className="mt-1 text-xs text-slate-400">{game.platforms}</p><span className="mt-3 inline-block text-xs text-cyan-300">Explore in GamerRP →</span></div></a></article>)}
       </div>}
       <p className="mt-4 border-t border-white/10 pt-3 text-[11px] leading-5 text-slate-500">Game artwork and announcements belong to their respective publishers/platforms. Release dates can change; verify from the linked source. GamerRP is not affiliated with these game publishers.</p>
     </section>
