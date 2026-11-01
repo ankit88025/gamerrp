@@ -26,15 +26,19 @@ const freeFeatures = [
 ];
 
 const plannedProFeatures = [
-  "Advanced profile themes and cover customization",
-  "Pinned achievements and a richer shareable portfolio",
-  "Profile-view and engagement analytics",
-  "Downloadable portfolio card for teams and recruiters",
-  "Additional showcase sections for clips and tournament results",
+  "Portfolio builder with three visual layouts: Neon, Classic and Minimal",
+  "Export a shareable gamer portfolio using Print / Save as PDF",
+  "Showcase your saved gamer profile, games, skills, rank and saved Valorant achievements",
+];
+
+const plannedNextFeatures = [
+  "Profile-view and engagement analytics (coming later)",
+  "Pinned achievements and additional showcase sections (coming later)",
 ];
 
 export default function PricingPage() {
   const [userId, setUserId] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [currency, setCurrency] = useState<Currency>("INR");
@@ -69,6 +73,23 @@ export default function PricingPage() {
     if (typeof data.mode === "string") setMode(data.mode);
   }, []);
 
+  const checkOwnerAccess = useCallback(async (token: string | null) => {
+    if (!token) {
+      setIsOwner(false);
+      return;
+    }
+    try {
+      const response = await fetch("/api/pro-access", {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      });
+      const data = await response.json().catch(() => ({}));
+      setIsOwner(response.ok && data.isOwner === true);
+    } catch {
+      setIsOwner(false);
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
     const syncSession = async () => {
@@ -76,6 +97,7 @@ export default function PricingPage() {
       if (!active) return;
       setUserId(session?.user.id ?? null);
       setAccessToken(session?.access_token ?? null);
+      void checkOwnerAccess(session?.access_token ?? null);
       setAuthChecked(true);
       if (session?.user.id) void loadSubscription(session.user.id);
     };
@@ -86,9 +108,10 @@ export default function PricingPage() {
       if (!active) return;
       setUserId(session?.user.id ?? null);
       setAccessToken(session?.access_token ?? null);
+      void checkOwnerAccess(session?.access_token ?? null);
       setAuthChecked(true);
       if (session?.user.id) void loadSubscription(session.user.id);
-      else setSubscription(null);
+      else { setSubscription(null); setIsOwner(false); }
     });
     const params = new URLSearchParams(window.location.search);
     setUpgradeIntent(params.get("upgrade") === "pro");
@@ -97,7 +120,7 @@ export default function PricingPage() {
     }
 
     return () => { active = false; listener.subscription.unsubscribe(); };
-  }, [loadSubscription, refreshBilling]);
+  }, [checkOwnerAccess, loadSubscription, refreshBilling]);
 
   async function startCheckout() {
     setMessage("");
@@ -134,7 +157,7 @@ export default function PricingPage() {
   }
 
   const price = pricePreview[currency];
-  const activePro = subscription?.plan === "pro" && subscription?.status === "active";
+  const activePro = isOwner || (subscription?.plan === "pro" && subscription?.status === "active");
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-12 text-white sm:px-6">
@@ -183,19 +206,28 @@ export default function PricingPage() {
             </div>
             <p className="mt-5 text-4xl font-black">{price.symbol}{interval === "month" ? price.month : price.year}<span className="text-base font-medium text-slate-400"> / {interval === "month" ? "month" : "year"}</span></p>
             <p className="mt-2 text-xs leading-5 text-slate-500">Indicative regional price only. When payments are enabled, Paddle checkout shows the final supported local price and applicable tax.</p>
+            <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="font-semibold text-white">Payment methods shown at secure checkout</p>
+              <p className="mt-2 text-sm leading-6 text-slate-300">Credit and debit cards are supported. UPI can be shown to eligible customers in India when the checkout price is in INR and UPI is enabled in Paddle. PayPal and other local methods may appear depending on location, currency and device.</p>
+              <p className="mt-2 text-xs leading-5 text-slate-500">These options are handled by Paddle Checkout; GamerRP never asks you to type card or UPI credentials into this page. Pro checkout remains unavailable until merchant approval and secure billing setup are complete.</p>
+            </div>
             <ul className="mt-6 flex-1 space-y-3 text-sm text-slate-300">{plannedProFeatures.map(feature => <li key={feature} className="flex gap-3"><span className="text-violet-300">✦</span><span>{feature}</span></li>)}</ul>
+            <div className="mt-5 rounded-xl border border-white/10 p-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Planned later — not available yet</p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-500">{plannedNextFeatures.map(feature => <li key={feature}>• {feature}</li>)}</ul>
+            </div>
             {activePro
-              ? <div className="mt-8 rounded-xl border border-emerald-300/20 bg-emerald-300/5 p-4 text-sm text-emerald-100">Your Pro subscription is active{subscription?.current_period_end ? ` until ${new Date(subscription.current_period_end).toLocaleDateString()}` : ""}.</div>
+              ? <div className="mt-8 rounded-xl border border-emerald-300/20 bg-emerald-300/5 p-4 text-sm text-emerald-100">{isOwner ? "Owner test access is enabled for your account. No payment or subscription was created." : `Your Pro subscription is active${subscription?.current_period_end ? ` until ${new Date(subscription.current_period_end).toLocaleDateString()}` : ""}.`}</div>
               : <button type="button" onClick={() => void startCheckout()} disabled={busy || (authChecked && userId !== null && !proCheckoutEnabled)} className="mt-8 rounded-xl bg-violet-300 px-5 py-3 text-center font-bold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60">{busy ? "Opening secure checkout…" : proCheckoutEnabled ? "Continue to secure checkout" : userId ? "Pro checkout coming soon" : "Create account & choose Pro"}</button>}
             {!proCheckoutEnabled && <p className="mt-3 text-center text-xs leading-5 text-amber-100/75">No checkout or payment is active until Paddle approval, price IDs, webhook and the subscription database are fully configured. Choosing Pro never charges you by itself.</p>}
             {proCheckoutEnabled && mode === "sandbox" && <p className="mt-3 text-center text-xs text-amber-200">Sandbox mode: test transactions only, not live sales.</p>}
           </section>
         </div>
 
-        {userId && <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 p-4"><div className="text-sm text-slate-400">{loadingSubscription ? "Checking subscription status…" : activePro ? "Pro access is verified by the billing webhook." : "You are on the Free plan unless a verified active Pro subscription is shown."}</div><button type="button" onClick={() => { void refreshBilling(); if (userId) void loadSubscription(userId); }} className="rounded-lg border border-white/15 px-3 py-2 text-sm hover:bg-white/5">Refresh status</button></div>}
+        {userId && <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 p-4"><div className="text-sm text-slate-400">{loadingSubscription ? "Checking subscription status…" : isOwner ? "Owner test access is enabled for this account; no paid subscription was created." : activePro ? "Pro access is verified by the billing webhook." : "You are on the Free plan unless a verified active Pro subscription is shown."}</div><button type="button" onClick={() => { void refreshBilling(); if (userId) void loadSubscription(userId); }} className="rounded-lg border border-white/15 px-3 py-2 text-sm hover:bg-white/5">Refresh status</button></div>}
 
-        <p className="mt-8 text-center text-sm leading-6 text-slate-500">Pro features listed here are planned until implemented and tested. We will not charge for a feature that is not ready. Your existing account and saved games remain yours.</p>
-        <div className="mt-5 flex flex-wrap justify-center gap-4 text-sm"><Link href="/games" className="text-cyan-300 hover:text-cyan-200">Explore games →</Link><Link href="/profile" className="text-cyan-300 hover:text-cyan-200">My profile →</Link><Link href="/" className="text-slate-400 hover:text-white">Home</Link></div>
+        <p className="mt-8 text-center text-sm leading-6 text-slate-500">The portfolio builder unlocks for verified active Pro subscriptions, or owner-only test access. Profile analytics and extra showcase features remain planned and are not available yet. Your existing account and saved games remain yours.</p>
+        <div className="mt-5 flex flex-wrap justify-center gap-4 text-sm"><Link href="/games" className="text-cyan-300 hover:text-cyan-200">Explore games →</Link><Link href="/portfolio" className="text-cyan-300 hover:text-cyan-200">Portfolio builder →</Link><Link href="/profile" className="text-cyan-300 hover:text-cyan-200">My profile →</Link><Link href="/" className="text-slate-400 hover:text-white">Home</Link></div>
       </div>
     </main>
   );

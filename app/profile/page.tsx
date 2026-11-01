@@ -25,7 +25,6 @@ export default function Profile() {
   const [valorant, setValorant] = useState<ValorantData | null>(null);
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [avatarStyle, setAvatarStyle] = useState("Cyber Ninja");
-  const [avatarSaved, setAvatarSaved] = useState(false);
   const [gamingSkills, setGamingSkills] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
 
@@ -105,7 +104,7 @@ export default function Profile() {
     window.location.href = "/login";
   }
 
-  async function handleSave() {
+  async function handleSave(successMessage = "Profile saved to your account successfully!") {
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
     if (authError || !authData.user) {
@@ -132,12 +131,12 @@ export default function Profile() {
 
     if (error) {
       console.error("Supabase profile save failed:", error.message);
-      alert("Profile saved on this device, but cloud save failed: " + error.message);
+      alert("Cloud save failed: " + error.message);
       return;
     }
 
     setSaved(true);
-    alert("Profile saved to your account successfully!");
+    alert(successMessage);
   }
 
   return (
@@ -324,7 +323,7 @@ export default function Profile() {
           </div>
 
           <p className="mt-4 text-sm text-slate-500">
-            {gamingSkills.length} skills selected · Automatically saved
+            {gamingSkills.length} skills selected · Save your profile to sync across devices.
           </p>
         </div>
 
@@ -390,7 +389,7 @@ export default function Profile() {
                     type="button"
                     onClick={() => {
                       setAvatarStyle(option.name);
-                      setAvatarSaved(false);
+                      setSaved(false);
                     }}
                     aria-pressed={avatarStyle === option.name}
                     className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
@@ -412,19 +411,12 @@ export default function Profile() {
 
               <button
                 type="button"
-                onClick={() => {
-                  setAvatarSaved(true);
-                }}
+                onClick={() => void handleSave("Avatar saved to your account successfully!")}
                 className="mt-4 w-full rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
               >
                 Save Avatar
               </button>
 
-              {avatarSaved && (
-                <p role="status" className="mt-3 text-sm text-green-300">
-                  Avatar saved successfully!
-                </p>
-              )}
             </div>
           </div>
         </section>
@@ -486,7 +478,7 @@ export default function Profile() {
 
           <button
             type="button"
-            onClick={handleSave}
+            onClick={() => void handleSave()}
             className="w-full rounded-xl bg-cyan-400 py-3.5 font-semibold text-slate-950 hover:bg-cyan-300"
           >
             Save Profile
@@ -516,9 +508,18 @@ export default function Profile() {
                 Game Experience
               </p>
 
-              <h2 className="mt-1 text-2xl font-semibold">
-                🎮 Valorant
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <h2 className="mt-1 text-2xl font-semibold">
+                  🎮 Valorant
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = "/games/valorant"}
+                  className="rounded-xl border border-cyan-400/30 px-4 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-400/10"
+                >
+                  ✏️ Edit Experience
+                </button>
+              </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

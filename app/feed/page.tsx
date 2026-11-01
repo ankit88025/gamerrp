@@ -82,7 +82,7 @@ export default function FeedPage() {
 
   async function createPost(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if ((!draft.trim() && !selectedImage) || !userId) return;
+    if (!draft.trim() || !userId) return;
     setBusy(true); setMessage("");
 
     let imageUrl: string | null = null;
@@ -229,7 +229,7 @@ export default function FeedPage() {
                   <span className="text-xs text-slate-500">JPG, PNG, GIF or WebP · max 5 MB</span>
                 </div>
                 <span className="text-xs text-slate-500">{draft.length}/2000 characters</span>
-                <button disabled={busy || (!draft.trim() && !selectedImage)} className="rounded-xl bg-cyan-400 px-5 py-2.5 font-bold text-slate-950 disabled:opacity-50">{busy ? "Posting..." : "Publish post"}</button>
+                <button disabled={busy || !draft.trim()} className="rounded-xl bg-cyan-400 px-5 py-2.5 font-bold text-slate-950 disabled:opacity-50">{busy ? "Posting..." : "Publish post"}</button>
               </div>
               {message && <p role="alert" className="mt-3 text-sm text-amber-300">{message}</p>}
             </form>
@@ -244,7 +244,7 @@ export default function FeedPage() {
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-cyan-400/10 text-xl">🎮</div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{post.gamer_name}</p>
+                    <Link href={`/gamer/${post.user_id}`} className="font-semibold hover:text-cyan-300">{post.gamer_name}</Link>
                     <p className="text-xs text-slate-500">{new Date(post.created_at).toLocaleString()}</p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -271,7 +271,7 @@ export default function FeedPage() {
                   {post.comments.map((comment) => (
                     <div key={comment.id} className="rounded-xl bg-slate-950/70 px-3 py-2">
                       <div className="flex items-start justify-between gap-3">
-                        <p className="text-xs font-semibold text-cyan-300">{comment.gamer_name}</p>
+                        <Link href={`/gamer/${comment.user_id}`} className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">{comment.gamer_name}</Link>
                         {comment.user_id === userId && (
                           <button
                             type="button"

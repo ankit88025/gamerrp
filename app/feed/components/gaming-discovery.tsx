@@ -22,12 +22,12 @@ const popular = [
 
 // Dates are based on published release calendars checked 29 Oct 2026; always open the source to reconfirm.
 const upcoming = [
-  { name: "The Legend of Zelda: Ocarina of Time", date: "5 Nov 2026", platforms: "Nintendo Switch 2", image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
-  { name: "Grand Theft Auto VI", date: "19 Nov 2026", platforms: "PlayStation 5 · Xbox Series X|S", image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg", source: "https://www.rockstargames.com/VI" },
-  { name: "Warhammer 40,000: Dawn of War IV", date: "3 Dec 2026", platforms: "PC", image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg", source: "https://gametechreport.com/calendar/" },
-  { name: "Professor Layton and the New World of Steam", date: "10 Dec 2026", platforms: "Nintendo platforms · PC", image: "https://cdn.akamai.steamstatic.com/steam/apps/413150/header.jpg", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
-  { name: "Path of Exile II", date: "11 Dec 2026", platforms: "PC · PlayStation · Xbox", image: "https://cdn.akamai.steamstatic.com/steam/apps/2694490/header.jpg", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
-  { name: "Dragon Quest Monsters: The Withered World", date: "3 Dec 2026", platforms: "PC · PlayStation · Nintendo", image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
+  { name: "The Legend of Zelda: Ocarina of Time", date: "5 Nov 2026", platforms: "Nintendo Switch 2", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
+  { name: "Grand Theft Auto VI", date: "19 Nov 2026", platforms: "PlayStation 5 · Xbox Series X|S", source: "https://www.rockstargames.com/VI" },
+  { name: "Warhammer 40,000: Dawn of War IV", date: "3 Dec 2026", platforms: "PC", source: "https://gametechreport.com/calendar/" },
+  { name: "Professor Layton and the New World of Steam", date: "10 Dec 2026", platforms: "Nintendo platforms · PC", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
+  { name: "Path of Exile II", date: "11 Dec 2026", platforms: "PC · PlayStation · Xbox", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
+  { name: "Dragon Quest Monsters: The Withered World", date: "3 Dec 2026", platforms: "PC · PlayStation · Nintendo", source: "https://www.videogameschronicle.com/guide/upcoming-game-release-dates-schedule/" },
 ];
 
 const cover = (appId: number) => `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
@@ -86,7 +86,12 @@ export default function GamingDiscovery() {
       </div>}
 
       {section === "Upcoming Games" && <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {upcoming.map((game) => <article key={game.name} className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/70"><a href={game.source} target="_blank" rel="noreferrer" className="group block"><img src={game.image} alt={`${game.name} game artwork`} loading="lazy" className="h-32 w-full object-cover"/><div className="p-3"><span className="text-xs font-bold text-amber-300">UPCOMING · {game.date}</span><h3 className="mt-1 font-bold group-hover:text-cyan-200">{game.name}</h3><p className="mt-1 text-xs text-slate-400">{game.platforms}</p><span className="mt-3 inline-block text-xs text-cyan-300">Check release source ↗</span></div></a></article>)}
+        {upcoming.map((game) => <article key={game.name} className="overflow-hidden rounded-xl border border-white/10 bg-slate-950/70"><a href={game.source} target="_blank" rel="noreferrer" className="group block"><div className="flex h-32 items-center justify-center bg-gradient-to-br from-cyan-400/20 via-slate-900 to-indigo-500/20 px-5 text-center">
+  <div>
+    <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-cyan-300">GamerRP Upcoming</span>
+    <p className="mt-2 text-lg font-black text-white">{game.name}</p>
+  </div>
+</div><div className="p-3"><span className="text-xs font-bold text-amber-300">UPCOMING · {game.date}</span><h3 className="mt-1 font-bold group-hover:text-cyan-200">{game.name}</h3><p className="mt-1 text-xs text-slate-400">{game.platforms}</p><span className="mt-3 inline-block text-xs text-cyan-300">Check release source ↗</span></div></a></article>)}
       </div>}
       <p className="mt-4 border-t border-white/10 pt-3 text-[11px] leading-5 text-slate-500">Game artwork and announcements belong to their respective publishers/platforms. Release dates can change; verify from the linked source. GamerRP is not affiliated with these game publishers.</p>
     </section>

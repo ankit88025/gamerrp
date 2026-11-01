@@ -35,6 +35,8 @@ export default function SiteNav() {
   const links = userId
     ? [
         { href: "/feed", label: "Feed" },
+        { href: "/chat", label: "Chat" },
+        { href: "/portfolio", label: "Portfolio" },
         { href: "/discover", label: "Discover" },
         { href: "/games", label: "Games" },
         { href: "/opportunities", label: "Opportunities" },
@@ -55,7 +57,7 @@ export default function SiteNav() {
           { href: "/pricing", label: "Pricing" },
         ];
 
-  const loginHref = `/login?next=${encodeURIComponent(pathname || "/")}`;
+  const loginHref = "/login?next=%2Ffeed";
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/95 text-white backdrop-blur">
       <nav className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
