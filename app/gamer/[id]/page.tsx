@@ -36,6 +36,7 @@ export default function GamerProfilePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -49,6 +50,8 @@ export default function GamerProfilePage() {
         window.location.replace("/login");
         return;
       }
+
+      setCurrentUserId(auth.user.id);
 
       const { data, error: profileError } = await supabase
         .from("gamer_profiles")
@@ -121,6 +124,14 @@ export default function GamerProfilePage() {
                     <h1 className="break-words text-2xl font-bold">{profile.gamer_name || "Gamer"}</h1>
                     <p className="text-sm text-slate-400">{profile.country || "Location not added"}</p>
                   </div>
+                  {currentUserId && currentUserId !== profile.user_id && (
+                    <Link
+                      href={`/chat?user=${encodeURIComponent(profile.user_id)}`}
+                      className="shrink-0 rounded-xl bg-cyan-400 px-4 py-2.5 text-sm font-bold text-slate-950 hover:bg-cyan-300"
+                    >
+                      Message
+                    </Link>
+                  )}
                 </div>
 
                 <p className="mt-6 whitespace-pre-wrap leading-7 text-slate-300">
