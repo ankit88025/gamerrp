@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import GamingDiscovery from "@/app/feed/components/gaming-discovery";
 
 type Gamer = { user_id: string; gamer_name: string | null; bio: string | null; country: string | null; selected_games: string[] | null; gaming_skills: string[] | null; avatar_style: string | null };
 const inputClass = "w-full rounded-xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none focus:border-cyan-400";
@@ -75,6 +76,7 @@ export default function DiscoverPage() {
         <Link href="/" className="text-2xl font-black">Gamer<span className="text-cyan-400">RP</span></Link>
         <nav className="flex flex-wrap gap-2 text-sm"><Link href="/feed" className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5">Feed</Link><Link href="/games" className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5">Games</Link><Link href="/profile" className="rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5">My profile</Link></nav>
       </header>
+      <div className="mb-8"><GamingDiscovery /></div>
       <section className="mb-8 rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-400/10 to-slate-900 p-7 sm:p-10">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-300">Gamer network</p>
         <h1 className="mt-3 text-3xl font-black sm:text-5xl">Find your next teammate.</h1>
