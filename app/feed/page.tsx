@@ -5,11 +5,13 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 type GamerProfile = { user_id: string; gamer_name: string | null; avatar_style?: string | null };
+type LikeUser = { user_id: string; gamer_name: string };
 type Comment = { id: string; post_id: string; user_id: string; body: string; created_at: string; gamer_name?: string };
 type Post = {
   id: string; user_id: string; body: string; image_url?: string | null; created_at: string;
   gamer_name: string; avatar_style?: string | null; likes: number; liked: boolean;
   comments: Comment[];
+  likers: LikeUser[];
 };
 
 const panel = "rounded-2xl border border-white/10 bg-slate-900/70";
@@ -55,6 +57,18 @@ export default function FeedPage() {
     ]);
     const profiles = new Map<string, GamerProfile>((profileRows || []).map((p) => [p.user_id, p] as [string, GamerProfile]));
     const likes = likeRows || [];
+    const likerUserIds = [...new Set(likes.map((like) => like.user_id))];
+    let likerProfiles: GamerProfile[] = [];
+    if (likerUserIds.length) {
+      const { data } = await supabase
+        .from("gamer_profiles")
+        .select("user_id,gamer_name")
+        .in("user_id", likerUserIds);
+      likerProfiles = (data || []) as GamerProfile[];
+    }
+    const likerNames = new Map(
+      likerProfiles.map((profile) => [profile.user_id, profile.gamer_name || "Gamer"] as [string, string])
+    );
     const comments = (commentRows || []) as Comment[];
     const commentUserIds = [...new Set(comments.map((c) => c.user_id))];
     let commentProfiles: GamerProfile[] = [];
@@ -72,6 +86,12 @@ export default function FeedPage() {
         avatar_style: profile?.avatar_style,
         likes: likes.filter((l) => l.post_id === p.id).length,
         liked: likes.some((l) => l.post_id === p.id && l.user_id === currentUserId),
+        likers: likes
+          .filter((like) => like.post_id === p.id)
+          .map((like) => ({
+            user_id: like.user_id,
+            gamer_name: likerNames.get(like.user_id) || "Gamer",
+          })),
         comments: comments.filter((c) => c.post_id === p.id).map((c) => ({ ...c, gamer_name: commentNames.get(c.user_id) || "Gamer" })),
       };
     }));
@@ -142,7 +162,7 @@ export default function FeedPage() {
       ? await supabase.from("gamer_post_likes").delete().eq("post_id", post.id).eq("user_id", userId)
       : await supabase.from("gamer_post_likes").insert({ post_id: post.id, user_id: userId });
     if (error) { setMessage(error.message); return; }
-    setPosts((current) => current.map((p) => p.id === post.id ? { ...p, liked: !p.liked, likes: p.likes + (p.liked ? -1 : 1) } : p));
+    await loadFeed();
   }
 
   async function addComment(postId: string) {
@@ -267,6 +287,22 @@ export default function FeedPage() {
                   <button onClick={() => void toggleLike(post)} className={post.liked ? "font-semibold text-cyan-300" : "text-slate-300 hover:text-cyan-300"}>{post.liked ? "♥ Liked" : "♡ Like"} · {post.likes}</button>
                   <span className="text-slate-500">💬 {post.comments.length} comments</span>
                 </div>
+                {post.likers.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-2 text-xs text-slate-400">
+                    <span>♥ Liked by</span>
+                    {post.likers.map((liker, index) => (
+                      <span key={liker.user_id}>
+                        {index > 0 && ", "}
+                        <Link
+                          href={`/gamer/${liker.user_id}`}
+                          className="font-semibold text-cyan-300 hover:text-cyan-200 hover:underline"
+                        >
+                          {liker.gamer_name}
+                        </Link>
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="mt-3 space-y-3">
                   {post.comments.map((comment) => (
                     <div key={comment.id} className="rounded-xl bg-slate-950/70 px-3 py-2">
